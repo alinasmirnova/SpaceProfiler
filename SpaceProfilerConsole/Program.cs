@@ -1,13 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using SpaceProfilerLogic;
+using SpaceProfilerLogic.Tree;
 
 var directory = Console.ReadLine();
 
-var profiler = new Profiler();
-var result = profiler.GetOrderedFiles(directory);
-
-foreach (var fileInfo in result)
-{
-    Console.WriteLine($"{fileInfo.Length} {fileInfo.FullName}");
-}
+var tree = FileSystemEntriesTreeBuilder.Build(directory);
+Console.WriteLine(tree == null ? $"Can not open directory:{directory}" : $"Total size: {tree.Size}");
