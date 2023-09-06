@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{179BF463
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceProfilerLogicTests", "SpaceProfilerLogicTests\SpaceProfilerLogicTests.csproj", "{924D31A0-B1DA-4B96-9F74-6E257D97F13B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceProfiler", "SpaceProfiler\SpaceProfiler.csproj", "{788AB57B-9807-4084-9A54-6E0D20592F5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{924D31A0-B1DA-4B96-9F74-6E257D97F13B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{924D31A0-B1DA-4B96-9F74-6E257D97F13B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{924D31A0-B1DA-4B96-9F74-6E257D97F13B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{788AB57B-9807-4084-9A54-6E0D20592F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{788AB57B-9807-4084-9A54-6E0D20592F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{788AB57B-9807-4084-9A54-6E0D20592F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{788AB57B-9807-4084-9A54-6E0D20592F5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{924D31A0-B1DA-4B96-9F74-6E257D97F13B} = {179BF463-5239-4A80-905E-434C007A3A3E}

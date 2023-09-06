@@ -1,0 +1,47 @@
+﻿<Window x:Class="SpaceProfiler.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SpaceProfiler"
+        xmlns:viewModel="clr-namespace:SpaceProfiler.ViewModel"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
+           <Button Width="27" Height="27" Margin="0,0,5,0"><Image Margin="1,0" Source="Icons\opened-folder.png" /></Button>
+           <TextBlock Text="{Binding CurrentDirectory}"/>
+       </StackPanel>
+        
+        <TreeView ItemsSource="{Binding Tree}">
+            <TreeView.ItemContainerStyle>
+                <!-- 
+        This Style binds a TreeViewItem to a TreeViewItemViewModel. 
+        -->
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.Resources>
+                <HierarchicalDataTemplate 
+                    DataType="{x:Type viewModel:DirectoryViewModel}" 
+                    ItemsSource="{Binding Children}"
+                >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                
+            </TreeView.Resources>
+        </TreeView>
+    </DockPanel>
+</Window>
