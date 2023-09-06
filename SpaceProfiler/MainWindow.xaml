@@ -15,9 +15,6 @@
         
         <TreeView ItemsSource="{Binding Tree}">
             <TreeView.ItemContainerStyle>
-                <!-- 
-        This Style binds a TreeViewItem to a TreeViewItemViewModel. 
-        -->
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
@@ -39,8 +36,22 @@
                         <TextBlock Text="{Binding Name}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
-
-                
+                <HierarchicalDataTemplate 
+                    DataType="{x:Type viewModel:FileViewModel}" 
+                    ItemsSource="{Binding Children}"
+                >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate 
+                    DataType="{x:Type viewModel:FilesContainerViewModel}" 
+                    ItemsSource="{Binding Children}"
+                >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Count}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
     </DockPanel>
