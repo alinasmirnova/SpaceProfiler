@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
@@ -12,7 +11,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
         this.entry = entry;
     }
 
-    public string Name => Path.GetFileName(entry.FullName);
+    public string Name => entry.Name ?? entry.FullName;
 
     protected override void LoadChildren()
     {

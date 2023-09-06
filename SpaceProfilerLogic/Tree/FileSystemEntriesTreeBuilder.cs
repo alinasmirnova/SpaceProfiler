@@ -7,7 +7,7 @@ public static class FileSystemEntriesTreeBuilder
         if (!Directory.Exists(rootDirectory))
             return null;
 
-        var root = new FileSystemEntry(rootDirectory);
+        var root = new FileSystemEntry(rootDirectory, Path.GetFileName(rootDirectory));
         Fill(root);
         return root;
     }
@@ -40,7 +40,7 @@ public static class FileSystemEntriesTreeBuilder
     {
         foreach (var directory in Directory.EnumerateDirectories(entry.FullName))
         {
-            var child = new FileSystemEntry(directory);
+            var child = new FileSystemEntry(directory, Path.GetFileName(directory));
             entry.Children.Add(child);
             yield return child;
         }
@@ -55,7 +55,7 @@ public static class FileSystemEntriesTreeBuilder
     {
         foreach (var file in Directory.EnumerateFiles(entry.FullName))
         {
-            var child = new FileSystemEntry(file, FileSizeCalculator.GetFileSize(file));
+            var child = new FileSystemEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file));
             entry.Children.Add(child);
             entry.Size += child.Size;
         }

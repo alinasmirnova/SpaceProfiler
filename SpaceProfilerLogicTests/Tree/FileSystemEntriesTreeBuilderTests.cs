@@ -24,7 +24,7 @@ public class FileSystemEntriesTreeBuilderTests
     [Test]
     public void EmptyDirectory()
     {
-        var expected = new FileSystemEntry(root);
+        var expected = new FileSystemEntry(root, root);
         var actual = FileSystemEntriesTreeBuilder.Build(root);
         actual.Should().BeEquivalentTo(expected);
     }
@@ -33,13 +33,13 @@ public class FileSystemEntriesTreeBuilderTests
     public void FilesOnlyDirectory()
     {
         helper.CreateFiles(1000, "1", "2", "3");
-        var expected = new FileSystemEntry(root, 3000)
+        var expected = new FileSystemEntry(root, root, 3000)
         {
             Children =
             {
-                new FileSystemEntry($"{root}\\1", 1000),
-                new FileSystemEntry($"{root}\\2", 1000),
-                new FileSystemEntry($"{root}\\3", 1000),
+                new FileSystemEntry($"{root}\\1", "1", 1000),
+                new FileSystemEntry($"{root}\\2", "2", 1000),
+                new FileSystemEntry($"{root}\\3", "3", 1000),
             }
         };
         
@@ -53,16 +53,16 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory("1");
         helper.CreateFiles(1000, "1\\1f", "1\\2f");
 
-        var expected = new FileSystemEntry(root, 2000)
+        var expected = new FileSystemEntry(root, root, 2000)
         {
             Children =
             {
-                new FileSystemEntry($"{root}\\1", 2000)
+                new FileSystemEntry($"{root}\\1", "1", 2000)
                 {
                     Children =
                     {
-                        new FileSystemEntry($@"{root}\1\1f", 1000),
-                        new FileSystemEntry($@"{root}\1\2f", 1000),
+                        new FileSystemEntry($@"{root}\1\1f","1f", 1000),
+                        new FileSystemEntry($@"{root}\1\2f", "2f", 1000),
                     }
                 }
             }
@@ -88,39 +88,39 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory(@"3\31\311");
         helper.CreateFiles(1000, @"3\31\311f", @"3\31\312f");
 
-        var expected = new FileSystemEntry($"{root}", 9000)
+        var expected = new FileSystemEntry(root, root, 9000)
         {
             Children =
             {
-                new FileSystemEntry($"{root}\\1", 2000)
+                new FileSystemEntry($"{root}\\1", "1", 2000)
                 {
                     Children =
                     {
-                        new FileSystemEntry($@"{root}\1\11f", 1000),
-                        new FileSystemEntry($@"{root}\1\12f", 1000),
+                        new FileSystemEntry($@"{root}\1\11f", "11f", 1000),
+                        new FileSystemEntry($@"{root}\1\12f", "12f", 1000),
                     }
                 },
-                new FileSystemEntry($"{root}\\2", 0),
-                new FileSystemEntry($"{root}\\3", 5000)
+                new FileSystemEntry($"{root}\\2", "2", 0),
+                new FileSystemEntry($"{root}\\3", "3", 5000)
                 {
                     Children =
                     {
-                        new FileSystemEntry($@"{root}\3\31", 2000)
+                        new FileSystemEntry($@"{root}\3\31", "31", 2000)
                         {
                             Children =
                             {
-                                new FileSystemEntry($@"{root}\3\31\311", 0),
-                                new FileSystemEntry($@"{root}\3\31\311f", 1000),
-                                new FileSystemEntry($@"{root}\3\31\312f", 1000),
+                                new FileSystemEntry($@"{root}\3\31\311", "311", 0),
+                                new FileSystemEntry($@"{root}\3\31\311f", "311f", 1000),
+                                new FileSystemEntry($@"{root}\3\31\312f", "312f", 1000),
                             }
                         },
-                        new FileSystemEntry($@"{root}\3\31f", 1000),
-                        new FileSystemEntry($@"{root}\3\32f", 1000),
-                        new FileSystemEntry($@"{root}\3\33f", 1000),
+                        new FileSystemEntry($@"{root}\3\31f", "31f", 1000),
+                        new FileSystemEntry($@"{root}\3\32f", "32f", 1000),
+                        new FileSystemEntry($@"{root}\3\33f", "33f", 1000),
                     }
                 },
-                new FileSystemEntry($"{root}\\01f", 1000),
-                new FileSystemEntry($"{root}\\02f", 1000),
+                new FileSystemEntry($"{root}\\01f", "01f", 1000),
+                new FileSystemEntry($"{root}\\02f", "02f", 1000),
             }
         };
         
