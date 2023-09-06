@@ -5,8 +5,8 @@ namespace SpaceProfiler.ViewModel;
 
 public class DirectoryViewModel : TreeViewItemViewModel
 {
-    private readonly FileSystemEntry entry;
-    public DirectoryViewModel(FileSystemEntry entry) : base(entry.Children.Any())
+    private readonly DirectoryEntry entry;
+    public DirectoryViewModel(DirectoryEntry entry) : base(entry.Subdirectories.Any())
     {
         this.entry = entry;
     }
@@ -15,7 +15,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
 
     protected override void LoadChildren()
     {
-        foreach (var child in entry.Children)
+        foreach (var child in entry.Subdirectories)
         {
             Children?.Add(new DirectoryViewModel(child));
         }

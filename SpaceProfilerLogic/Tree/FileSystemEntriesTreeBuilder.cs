@@ -7,7 +7,7 @@ public static class FileSystemEntriesTreeBuilder
         if (!Directory.Exists(rootDirectory))
             return null;
         
-        var root = new FileSystemEntry(rootDirectory, Path.GetFileName(rootDirectory));
+        var root = new DirectoryEntry(rootDirectory, Path.GetFileName(rootDirectory));
         var tree = new FileSystemEntryTree(root);
         Fill(tree);
         return tree;
@@ -15,11 +15,11 @@ public static class FileSystemEntriesTreeBuilder
 
     private static void Fill(FileSystemEntryTree tree)
     {
-        var stack = new Stack<FileSystemEntry>();
+        var stack = new Stack<DirectoryEntry>();
         stack.Push(tree.Root);
         while (stack.TryPeek(out var current))
         {
-            if (!current.Children.Any())
+            if (!current.Subdirectories.Any())
             {
                 var subDirectories = AddDirectories(current).ToArray();
                 foreach (var subDirectory in subDirectories)
@@ -37,27 +37,27 @@ public static class FileSystemEntriesTreeBuilder
         }
     }
 
-    private static IEnumerable<FileSystemEntry> AddDirectories(FileSystemEntry entry)
+    private static IEnumerable<DirectoryEntry> AddDirectories(DirectoryEntry entry)
     {
         foreach (var directory in Directory.EnumerateDirectories(entry.FullName))
         {
-            var child = new FileSystemEntry(directory, Path.GetFileName(directory));
-            entry.Children.Add(child);
+            var child = new DirectoryEntry(directory, Path.GetFileName(directory));
+            entry.Subdirectories.Add(child);
             yield return child;
         }
     }
 
-    private static long SumChildren(FileSystemEntry entry)
+    private static long SumChildren(DirectoryEntry entry)
     {
-        return entry.Children.Sum(c => c.Size);
+        return entry.Subdirectories.Sum(c => c.Size);
     }
 
-    private static void AddFiles(FileSystemEntry entry)
+    private static void AddFiles(DirectoryEntry entry)
     {
         foreach (var file in Directory.EnumerateFiles(entry.FullName))
         {
-            var child = new FileSystemEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file));
-            entry.Children.Add(child);
+            var child = new FileEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file));
+            entry.Files.Add(child);
             entry.Size += child.Size;
         }
     }

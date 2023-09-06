@@ -2,9 +2,9 @@
 
 public class FileSystemEntryTree
 {
-    public FileSystemEntry Root { get; }
+    public DirectoryEntry Root { get; }
 
-    public FileSystemEntryTree(FileSystemEntry root)
+    public FileSystemEntryTree(DirectoryEntry root)
     {
         Root = root;
     }
