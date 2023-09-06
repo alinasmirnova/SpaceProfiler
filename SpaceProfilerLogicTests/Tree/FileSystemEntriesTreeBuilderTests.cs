@@ -33,18 +33,17 @@ public class FileSystemEntriesTreeBuilderTests
     public void FilesOnlyDirectory()
     {
         helper.CreateFiles(1000, "1f", "2f", "3f");
-        var expected = new FileSystemEntryTree(new DirectoryEntry(root, root, 3000)
+        var entry = new DirectoryEntry(root, root, 3000)
         {
-            Files =
-            {
-                new FileEntry($"{root}\\1f", "1f", 1000),
-                new FileEntry($"{root}\\2f", "2f", 1000),
-                new FileEntry($"{root}\\3f", "3f", 1000),
-            }
-        });
+            Files = new List<FileEntry>{
+                new($"{root}\\1f", "1f", 1000),
+                new($"{root}\\2f", "2f", 1000),
+                new($"{root}\\3f", "3f", 1000)}
+        };
+        var expected = new FileSystemEntryTree(entry);
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
-        actual.Should().BeEquivalentTo(expected);
+        actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
     [Test]
@@ -55,21 +54,21 @@ public class FileSystemEntriesTreeBuilderTests
 
         var expected = new FileSystemEntryTree(new DirectoryEntry(root, root, 2000)
         {
-            Subdirectories =
+            Subdirectories = new List<DirectoryEntry>
             {
-                new DirectoryEntry($"{root}\\1", "1", 2000)
+                new($"{root}\\1", "1", 2000)
                 {
-                    Files =
+                    Files = new List<FileEntry>
                     {
-                        new FileEntry($@"{root}\1\1f","1f", 1000),
-                        new FileEntry($@"{root}\1\2f", "2f", 1000),
+                        new($@"{root}\1\1f","1f", 1000),
+                        new($@"{root}\1\2f", "2f", 1000),
                     }
                 }
             }
         });
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
-        actual.Should().BeEquivalentTo(expected);
+        actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
     [Test]
@@ -90,51 +89,51 @@ public class FileSystemEntriesTreeBuilderTests
 
         var expected = new FileSystemEntryTree(new DirectoryEntry(root, root, 9000)
         {
-            Subdirectories =
+            Subdirectories = new List<DirectoryEntry>
             {
-                new DirectoryEntry($"{root}\\1", "1", 2000)
+                new ($"{root}\\1", "1", 2000)
                 {
-                    Files =
+                    Files = new List<FileEntry>
                     {
-                        new FileEntry($@"{root}\1\11f", "11f", 1000),
-                        new FileEntry($@"{root}\1\12f", "12f", 1000),
+                        new ($@"{root}\1\11f", "11f", 1000),
+                        new ($@"{root}\1\12f", "12f", 1000),
                     }
                 },
-                new DirectoryEntry($"{root}\\2", "2", 0),
-                new DirectoryEntry($"{root}\\3", "3", 5000)
+                new ($"{root}\\2", "2", 0),
+                new ($"{root}\\3", "3", 5000)
                 {
-                    Subdirectories =
+                    Subdirectories = new List<DirectoryEntry>
                     {
-                        new DirectoryEntry($@"{root}\3\31", "31", 2000)
+                        new ($@"{root}\3\31", "31", 2000)
                         {
-                            Subdirectories =
+                            Subdirectories = new List<DirectoryEntry>
                             {
-                                new DirectoryEntry($@"{root}\3\31\311", "311", 0),
+                                new ($@"{root}\3\31\311", "311", 0),
                             },
-                            Files =
+                            Files = new List<FileEntry>
                             {
-                                new FileEntry($@"{root}\3\31\311f", "311f", 1000),
-                                new FileEntry($@"{root}\3\31\312f", "312f", 1000),
+                                new ($@"{root}\3\31\311f", "311f", 1000),
+                                new ($@"{root}\3\31\312f", "312f", 1000),
                             }
                         },
                     },
-                    Files =
+                    Files = new List<FileEntry>
                     {
-                        new FileEntry($@"{root}\3\31f", "31f", 1000),
-                        new FileEntry($@"{root}\3\32f", "32f", 1000),
-                        new FileEntry($@"{root}\3\33f", "33f", 1000),
+                        new ($@"{root}\3\31f", "31f", 1000),
+                        new ($@"{root}\3\32f", "32f", 1000),
+                        new ($@"{root}\3\33f", "33f", 1000),
                     }
                 },
             },
-            Files =
+            Files = new List<FileEntry>
             {
-                new FileEntry($"{root}\\01f", "01f", 1000),
-                new FileEntry($"{root}\\02f", "02f", 1000),
+                new ($"{root}\\01f", "01f", 1000),
+                new ($"{root}\\02f", "02f", 1000),
             }
         });
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
-        actual.Should().BeEquivalentTo(expected);
+        actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
     
     [TearDown]

@@ -41,7 +41,7 @@ public static class FileSystemEntriesTreeBuilder
     {
         foreach (var directory in Directory.EnumerateDirectories(entry.FullName))
         {
-            var child = new DirectoryEntry(directory, Path.GetFileName(directory));
+            var child = new DirectoryEntry(directory, Path.GetFileName(directory), 0, entry);
             entry.Subdirectories.Add(child);
             yield return child;
         }
@@ -56,7 +56,7 @@ public static class FileSystemEntriesTreeBuilder
     {
         foreach (var file in Directory.EnumerateFiles(entry.FullName))
         {
-            var child = new FileEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file));
+            var child = new FileEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file), entry);
             entry.Files.Add(child);
             entry.Size += child.Size;
         }
