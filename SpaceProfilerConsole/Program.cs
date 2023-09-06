@@ -5,4 +5,4 @@ using SpaceProfilerLogic.Tree;
 var directory = Console.ReadLine();
 
 var tree = FileSystemEntriesTreeBuilder.Build(directory);
-Console.WriteLine(tree == null ? $"Can not open directory:{directory}" : $"Total size: {tree.Size}");
+Console.WriteLine(tree == null ? $"Can not open directory:{directory}" : $"Total size: {tree.Root.Size}");

@@ -6,9 +6,12 @@ public class MainWindowViewModel
 {
     public DirectoryViewModel[]? Tree { get; }
 
-    public MainWindowViewModel(FileSystemEntry? tree)
+    public MainWindowViewModel(FileSystemEntryTree? tree)
     {
-        Tree = tree == null ? null : new [] {new DirectoryViewModel(tree)};
-        if (Tree != null) Tree[0].IsExpanded = true;
+        if (tree != null)
+        {
+            Tree = new[] { new DirectoryViewModel(tree.Root) };
+            Tree[0].IsExpanded = true;
+        }
     }
 }

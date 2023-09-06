@@ -24,7 +24,7 @@ public class FileSystemEntriesTreeBuilderTests
     [Test]
     public void EmptyDirectory()
     {
-        var expected = new FileSystemEntry(root, root);
+        var expected = new FileSystemEntryTree(new FileSystemEntry(root, root));
         var actual = FileSystemEntriesTreeBuilder.Build(root);
         actual.Should().BeEquivalentTo(expected);
     }
@@ -33,7 +33,7 @@ public class FileSystemEntriesTreeBuilderTests
     public void FilesOnlyDirectory()
     {
         helper.CreateFiles(1000, "1", "2", "3");
-        var expected = new FileSystemEntry(root, root, 3000)
+        var expected = new FileSystemEntryTree(new FileSystemEntry(root, root, 3000)
         {
             Children =
             {
@@ -41,7 +41,7 @@ public class FileSystemEntriesTreeBuilderTests
                 new FileSystemEntry($"{root}\\2", "2", 1000),
                 new FileSystemEntry($"{root}\\3", "3", 1000),
             }
-        };
+        });
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
         actual.Should().BeEquivalentTo(expected);
@@ -53,7 +53,7 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory("1");
         helper.CreateFiles(1000, "1\\1f", "1\\2f");
 
-        var expected = new FileSystemEntry(root, root, 2000)
+        var expected = new FileSystemEntryTree(new FileSystemEntry(root, root, 2000)
         {
             Children =
             {
@@ -66,7 +66,7 @@ public class FileSystemEntriesTreeBuilderTests
                     }
                 }
             }
-        };
+        });
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
         actual.Should().BeEquivalentTo(expected);
@@ -88,7 +88,7 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory(@"3\31\311");
         helper.CreateFiles(1000, @"3\31\311f", @"3\31\312f");
 
-        var expected = new FileSystemEntry(root, root, 9000)
+        var expected = new FileSystemEntryTree(new FileSystemEntry(root, root, 9000)
         {
             Children =
             {
@@ -122,7 +122,7 @@ public class FileSystemEntriesTreeBuilderTests
                 new FileSystemEntry($"{root}\\01f", "01f", 1000),
                 new FileSystemEntry($"{root}\\02f", "02f", 1000),
             }
-        };
+        });
         
         var actual = FileSystemEntriesTreeBuilder.Build(root);
         actual.Should().BeEquivalentTo(expected);

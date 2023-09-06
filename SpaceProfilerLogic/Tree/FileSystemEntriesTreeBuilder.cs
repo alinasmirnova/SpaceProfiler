@@ -2,20 +2,21 @@
 
 public static class FileSystemEntriesTreeBuilder
 {
-    public static FileSystemEntry? Build(string? rootDirectory)
+    public static FileSystemEntryTree? Build(string? rootDirectory)
     {
         if (!Directory.Exists(rootDirectory))
             return null;
-
+        
         var root = new FileSystemEntry(rootDirectory, Path.GetFileName(rootDirectory));
-        Fill(root);
-        return root;
+        var tree = new FileSystemEntryTree(root);
+        Fill(tree);
+        return tree;
     }
 
-    private static void Fill(FileSystemEntry root)
+    private static void Fill(FileSystemEntryTree tree)
     {
         var stack = new Stack<FileSystemEntry>();
-        stack.Push(root);
+        stack.Push(tree.Root);
         while (stack.TryPeek(out var current))
         {
             if (!current.Children.Any())
