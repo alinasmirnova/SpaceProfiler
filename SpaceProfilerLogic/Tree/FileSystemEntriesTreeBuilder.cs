@@ -15,8 +15,8 @@ public static class FileSystemEntriesTreeBuilder
 
     private static void Fill(FileSystemEntryTree tree)
     {
-        var stack = new Stack<DirectoryEntry>();
-        stack.Push(tree.Root);
+        var stack = new Queue<DirectoryEntry>();
+        stack.Enqueue(tree.Root);
         while (stack.TryPeek(out var current))
         {
             if (!current.Subdirectories.Any())
@@ -24,16 +24,12 @@ public static class FileSystemEntriesTreeBuilder
                 var subDirectories = AddDirectories(current).ToArray();
                 foreach (var subDirectory in subDirectories)
                 {
-                    stack.Push(subDirectory);
+                    stack.Enqueue(subDirectory);
                 }
-                
-                if (subDirectories.Any())
-                    continue;
             }
 
-            current.Size = SumChildren(current);
             AddFiles(current);
-            stack.Pop();
+            stack.Dequeue();
         }
     }
 
@@ -41,24 +37,19 @@ public static class FileSystemEntriesTreeBuilder
     {
         foreach (var directory in Directory.EnumerateDirectories(entry.FullName))
         {
-            var child = new DirectoryEntry(directory, Path.GetFileName(directory), 0, entry);
+            var child = new DirectoryEntry(directory, Path.GetFileName(directory), entry);
             entry.Subdirectories.Add(child);
             yield return child;
         }
-    }
-
-    private static long SumChildren(DirectoryEntry entry)
-    {
-        return entry.Subdirectories.Sum(c => c.Size);
     }
 
     private static void AddFiles(DirectoryEntry entry)
     {
         foreach (var file in Directory.EnumerateFiles(entry.FullName))
         {
-            var child = new FileEntry(file, Path.GetFileName(file), FileSizeCalculator.GetFileSize(file), entry);
+            var child = new FileEntry(file, Path.GetFileName(file), entry);
             entry.Files.Add(child);
-            entry.Size += child.Size;
+            child.Size = FileSizeCalculator.GetFileSize(file);
         }
     }
 }

@@ -4,14 +4,30 @@ public class FileSystemEntry
 {
     public string FullName { get; }
     public string? Name { get; }
-    public long Size { get; set; }
+
+    private long size;
+    public long Size
+    {
+        get => size;
+        set
+        {
+            if (Parent != null)
+                Parent.Size += value - size;
+            size = value;
+        } 
+    }
+
     public FileSystemEntry? Parent { get; set; }
-    
-    public FileSystemEntry(string fullName, string? name, long size = 0, FileSystemEntry? parent = null)
+
+    protected FileSystemEntry(string fullName, string? name, FileSystemEntry? parent = null)
     {
         FullName = fullName;
         Name = name;
         Parent = parent;
-        Size = size;
+    }
+
+    public override string ToString()
+    {
+        return Name ?? "null";
     }
 }
