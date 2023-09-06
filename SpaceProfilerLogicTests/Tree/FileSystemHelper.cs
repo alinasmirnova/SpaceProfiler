@@ -10,6 +10,7 @@ public class FileSystemHelper
         if (!Path.IsPathFullyQualified(Root))
             throw new ArgumentException("Incorrect root folder name", nameof(rootFolderName));
         
+        Clear();
         CreateDirectoryInternal(Root);
     }
 
@@ -35,7 +36,8 @@ public class FileSystemHelper
 
     public void Clear()
     {
-        Directory.Delete(Root, true);
+        if (Directory.Exists(Root))
+            Directory.Delete(Root, true);
     }
 
     private void CreateDirectoryInternal(string fullPath)
