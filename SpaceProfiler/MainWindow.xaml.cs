@@ -11,7 +11,7 @@ namespace SpaceProfiler
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel viewModel;
-        private TreeWatcher? treeWatcher;
+        private SelfSustainableTree? tree;
         
         public MainWindow()
         {
@@ -32,11 +32,11 @@ namespace SpaceProfiler
             if (dialog.ShowDialog()!.Value)
             {
                 viewModel.CurrentDirectory = dialog.SelectedPath;
-                treeWatcher?.Stop();
+                tree?.StopSynchronization();
 
-                treeWatcher = FileSystemEntriesTreeBuilder.Build(dialog.SelectedPath);
-                treeWatcher.Start();
-                viewModel.Tree = new[] { new DirectoryViewModel(treeWatcher.Tree.Root) };
+                tree = SelfSustainableTreeBuilder.Build(dialog.SelectedPath);
+                tree.StartSynchronization();
+                viewModel.Tree = new[] { new DirectoryViewModel(tree.Root) };
             }
         } 
     }

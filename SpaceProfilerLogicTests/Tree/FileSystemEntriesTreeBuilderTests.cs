@@ -19,13 +19,13 @@ public class FileSystemEntriesTreeBuilderTests
     [Test]
     public void DirectoryNotExist()
     {
-        Assert.That(() => FileSystemEntriesTreeBuilder.Build("Unknown"), Throws.ArgumentException);
+        Assert.That(() => SelfSustainableTreeBuilder.Build("Unknown"), Throws.ArgumentException);
     }
 
     [Test]
     public void EmptyDirectory()
     {
-        var expected = new FileSystemEntryTree(new DirectoryEntry(root, root));
+        var expected = new DirectoryEntry(root, root);
         var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected);
     }
@@ -34,14 +34,13 @@ public class FileSystemEntriesTreeBuilderTests
     public void FilesOnlyDirectory()
     {
         helper.CreateFiles(1000, "1f", "2f", "3f");
-        var entry = new DirectoryEntry(root, root, 3000)
+        var expected = new DirectoryEntry(root, root, 3000)
         {
             Files = new FileEntry[]{
                 new($"{root}\\1f", "1f", 1000),
                 new($"{root}\\2f", "2f", 1000),
                 new($"{root}\\3f", "3f", 1000)}
         };
-        var expected = new FileSystemEntryTree(entry);
         
         var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
@@ -53,7 +52,7 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory("1");
         helper.CreateFiles(1000, "1\\1f", "1\\2f");
 
-        var expected = new FileSystemEntryTree(new DirectoryEntry(root, root, 2000)
+        var expected = new DirectoryEntry(root, root, 2000)
         {
             Subdirectories = new DirectoryEntry[]
             {
@@ -66,7 +65,7 @@ public class FileSystemEntriesTreeBuilderTests
                     }
                 }
             }
-        });
+        };
         
         var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
@@ -88,7 +87,7 @@ public class FileSystemEntriesTreeBuilderTests
         helper.CreateDirectory(@"3\31\311");
         helper.CreateFiles(1000, @"3\31\311f", @"3\31\312f");
 
-        var expected = new FileSystemEntryTree(new DirectoryEntry(root, root, 9000)
+        var expected = new DirectoryEntry(root, root, 9000)
         {
             Subdirectories = new DirectoryEntry[]
             {
@@ -131,19 +130,19 @@ public class FileSystemEntriesTreeBuilderTests
                 new ($"{root}\\01f", "01f", 1000),
                 new ($"{root}\\02f", "02f", 1000),
             }
-        });
+        };
         
         var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
-    private FileSystemEntryTree? BuildTree(string treeRoot)
+    private DirectoryEntry BuildTree(string treeRoot)
     {
-        var watcher = FileSystemEntriesTreeBuilder.Build(treeRoot);
-        watcher.Start();
+        var tree = SelfSustainableTreeBuilder.Build(treeRoot);
+        tree.StartSynchronization();
         Thread.Sleep(100);
-        watcher.Stop();
-        return watcher?.Tree;
+        tree.StopSynchronization();
+        return tree.Root;
     }
     
     [TearDown]

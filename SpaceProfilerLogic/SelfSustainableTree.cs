@@ -3,18 +3,20 @@ using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfilerLogic;
 
-public class TreeWatcher
+public class SelfSustainableTree
 {
     private readonly ConcurrentQueue<DirectoryEntry> changesQueue;
     private readonly Thread[] workers;
     private readonly ConcurrentDictionary<DirectoryEntry, byte> updated;
-    public FileSystemEntryTree Tree { get; }
-
+    
+    private readonly FileSystemEntryTree tree;
     private bool stopped = true;
 
-    public TreeWatcher(FileSystemEntryTree tree)
+    public DirectoryEntry Root => tree.Root;
+
+    public SelfSustainableTree(FileSystemEntryTree tree)
     {
-        Tree = tree;
+        this.tree = tree;
         updated = new ConcurrentDictionary<DirectoryEntry, byte>();
         changesQueue = new ConcurrentQueue<DirectoryEntry>();
         workers = new[] { CreateWorkerThread(), CreateWorkerThread() };
@@ -65,17 +67,17 @@ public class TreeWatcher
         }
     }
 
-    public void Start()
+    public void StartSynchronization()
     {
         stopped = false;
-        changesQueue.Enqueue(Tree.Root);
+        changesQueue.Enqueue(Root);
         foreach (var worker in workers)
         {
             worker.Start();
         }
     }
 
-    public void Stop()
+    public void StopSynchronization()
     {
         stopped = true;
     }
