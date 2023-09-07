@@ -5,17 +5,7 @@ public class FileSystemEntry
     public string FullName { get; }
     public string? Name { get; }
 
-    private long size;
-    public long Size
-    {
-        get => size;
-        set
-        {
-            if (Parent != null)
-                Parent.Size += value - size;
-            size = value;
-        } 
-    }
+    public long Size { get; protected internal set; }
 
     public FileSystemEntry? Parent { get; set; }
 

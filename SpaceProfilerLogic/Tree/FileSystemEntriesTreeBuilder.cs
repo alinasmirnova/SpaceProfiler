@@ -49,7 +49,7 @@ public static class FileSystemEntriesTreeBuilder
         {
             var child = new FileEntry(file, Path.GetFileName(file), entry);
             entry.Files.Add(child);
-            child.Size = FileSizeCalculator.GetFileSize(file);
+            child.SetSize(FileSizeCalculator.GetFileSize(file));
         }
     }
 }
