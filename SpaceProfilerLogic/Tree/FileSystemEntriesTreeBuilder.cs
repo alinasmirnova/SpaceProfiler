@@ -19,37 +19,21 @@ public static class FileSystemEntriesTreeBuilder
         stack.Enqueue(tree.Root);
         while (stack.TryPeek(out var current))
         {
-            if (!current.Subdirectories.Any())
+            foreach (var file in Directory.EnumerateFiles(current.FullName))
             {
-                var subDirectories = AddDirectories(current).ToArray();
-                foreach (var subDirectory in subDirectories)
-                {
-                    stack.Enqueue(subDirectory);
-                }
+                var child = new FileEntry(file, Path.GetFileName(file), current);
+                current.Files.Add(child);
+                child.SetSize(FileSizeCalculator.GetFileSize(file));
             }
-
-            AddFiles(current);
+            
+            foreach (var directory in Directory.EnumerateDirectories(current.FullName))
+            {
+                var child = new DirectoryEntry(directory, Path.GetFileName(directory), current);
+                current.Subdirectories.Add(child);
+                stack.Enqueue(child);
+            }
+            
             stack.Dequeue();
-        }
-    }
-
-    private static IEnumerable<DirectoryEntry> AddDirectories(DirectoryEntry entry)
-    {
-        foreach (var directory in Directory.EnumerateDirectories(entry.FullName))
-        {
-            var child = new DirectoryEntry(directory, Path.GetFileName(directory), entry);
-            entry.Subdirectories.Add(child);
-            yield return child;
-        }
-    }
-
-    private static void AddFiles(DirectoryEntry entry)
-    {
-        foreach (var file in Directory.EnumerateFiles(entry.FullName))
-        {
-            var child = new FileEntry(file, Path.GetFileName(file), entry);
-            entry.Files.Add(child);
-            child.SetSize(FileSizeCalculator.GetFileSize(file));
         }
     }
 }
