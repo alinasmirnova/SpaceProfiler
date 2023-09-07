@@ -49,8 +49,6 @@ public class SelfSustainableTree
         {
             if (changesQueue.TryDequeue(out var directory))
             {
-                Console.WriteLine($"Thread {Environment.CurrentManagedThreadId} processing directory {directory.Name}");
-                
                 directory.Update(out var childrenNeedUpdate);
                 updated.TryAdd(directory, 1);
                 
