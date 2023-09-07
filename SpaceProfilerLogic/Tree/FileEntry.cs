@@ -8,16 +8,16 @@ public class FileEntry : FileSystemEntry
     
     public FileEntry(string fullName, string? name, long size) : base(fullName, name)
     {
-        Size = size;
+        this.size = size;
     }
 
-    public void SetSize(long size)
+    public void SetSize(long s)
     {
-        Size = size;
+        size = s;
         var parent = Parent;
         while (parent != null)
         {
-            parent.Size += size;
+            Interlocked.Add(ref parent.size, s);
             parent = parent.Parent;
         }
     }

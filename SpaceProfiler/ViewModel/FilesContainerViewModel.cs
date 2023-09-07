@@ -6,13 +6,13 @@ namespace SpaceProfiler.ViewModel;
 
 public class FilesContainerViewModel : TreeViewItemViewModel
 {
-    private readonly List<FileEntry> entries;
-    public FilesContainerViewModel(List<FileEntry> entries) : base(entries.Any())
+    private readonly FileEntry[] entries;
+    public FilesContainerViewModel(FileEntry[] entries) : base(entries.Any())
     {
         this.entries = entries;
     }
 
-    public int Count => entries.Count;
+    public int Count => entries.Length;
 
     protected override void LoadChildren()
     {

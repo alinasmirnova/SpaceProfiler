@@ -3,16 +3,17 @@
 public class FileSystemEntry
 {
     public string FullName { get; }
-    public string? Name { get; }
+    public string Name { get; }
 
-    public long Size { get; protected internal set; }
+    protected internal long size;
+    public long Size => size;
 
     public FileSystemEntry? Parent { get; set; }
 
     protected FileSystemEntry(string fullName, string? name, FileSystemEntry? parent = null)
     {
         FullName = fullName;
-        Name = name;
+        Name = name ?? fullName;
         Parent = parent;
     }
 

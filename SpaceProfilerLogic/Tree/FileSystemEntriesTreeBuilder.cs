@@ -22,15 +22,15 @@ public static class FileSystemEntriesTreeBuilder
             foreach (var file in Directory.EnumerateFiles(current.FullName))
             {
                 var child = new FileEntry(file, Path.GetFileName(file), current);
-                current.Files.Add(child);
-                child.SetSize(FileSizeCalculator.GetFileSize(file));
+                if (current.AddFile(child))
+                    child.SetSize(FileSizeCalculator.GetFileSize(file));
             }
             
             foreach (var directory in Directory.EnumerateDirectories(current.FullName))
             {
                 var child = new DirectoryEntry(directory, Path.GetFileName(directory), current);
-                current.Subdirectories.Add(child);
-                stack.Enqueue(child);
+                if (current.AddSubdirectory(child))
+                    stack.Enqueue(child);
             }
             
             stack.Dequeue();

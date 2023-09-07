@@ -11,7 +11,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
         this.entry = entry;
     }
 
-    public string Name => entry.Name ?? entry.FullName;
+    public string Name => entry.Name;
 
     protected override void LoadChildren()
     {
@@ -20,7 +20,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
             Children?.Add(new DirectoryViewModel(child));
         }
 
-        if (entry.Subdirectories.Any() && entry.Files.Count > 1)
+        if (entry.Subdirectories.Any() && entry.Files.Length > 1)
         {
             Children?.Add(new FilesContainerViewModel(entry.Files));
         }
