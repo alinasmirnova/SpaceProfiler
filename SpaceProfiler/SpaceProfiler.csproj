@@ -18,4 +18,8 @@
     <ItemGroup>
       <ProjectReference Include="..\SpaceProfilerLogic\SpaceProfilerLogic.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    </ItemGroup>
 </Project>

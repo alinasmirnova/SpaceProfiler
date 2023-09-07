@@ -17,7 +17,6 @@ public class TreeWatcher
         Tree = tree;
         updated = new ConcurrentDictionary<DirectoryEntry, byte>();
         changesQueue = new ConcurrentQueue<DirectoryEntry>();
-        changesQueue.Enqueue(tree.Root);
         workers = new[] { CreateWorkerThread(), CreateWorkerThread() };
     }
 
@@ -69,6 +68,7 @@ public class TreeWatcher
     public void Start()
     {
         stopped = false;
+        changesQueue.Enqueue(Tree.Root);
         foreach (var worker in workers)
         {
             worker.Start();

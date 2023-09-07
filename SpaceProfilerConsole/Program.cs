@@ -5,11 +5,7 @@ using SpaceProfilerLogic;
 var directory = Console.ReadLine();
 
 var treeWatcher = FileSystemEntriesTreeBuilder.Build(directory);
-if (treeWatcher == null)
-{
-    Console.WriteLine("Can not open directory");
-    return -1;
-}
+treeWatcher.Start();
 
 Console.WriteLine("Main thread goes to sleep");
 Thread.Sleep(10000);

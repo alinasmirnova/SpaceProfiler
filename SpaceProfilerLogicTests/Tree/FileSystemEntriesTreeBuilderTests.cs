@@ -19,7 +19,7 @@ public class FileSystemEntriesTreeBuilderTests
     [Test]
     public void DirectoryNotExist()
     {
-        Assert.That(FileSystemEntriesTreeBuilder.Build("Unknown"), Is.Null);
+        Assert.That(() => FileSystemEntriesTreeBuilder.Build("Unknown"), Throws.ArgumentException);
     }
 
     [Test]
@@ -140,8 +140,9 @@ public class FileSystemEntriesTreeBuilderTests
     private FileSystemEntryTree? BuildTree(string treeRoot)
     {
         var watcher = FileSystemEntriesTreeBuilder.Build(treeRoot);
+        watcher.Start();
         Thread.Sleep(100);
-        watcher?.Stop();
+        watcher.Stop();
         return watcher?.Tree;
     }
     

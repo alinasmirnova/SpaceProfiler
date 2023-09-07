@@ -1,17 +1,49 @@
-﻿using SpaceProfilerLogic.Tree;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
 
-public class MainWindowViewModel
+public class MainWindowViewModel : INotifyPropertyChanged
 {
-    public DirectoryViewModel[]? Tree { get; }
+    private string? currentDirectory;
+    private DirectoryViewModel[]? tree;
 
-    public MainWindowViewModel(FileSystemEntryTree? tree)
+    public string? CurrentDirectory
     {
-        if (tree != null)
+        get => currentDirectory;
+        set
         {
-            Tree = new[] { new DirectoryViewModel(tree.Root) };
-            Tree[0].IsExpanded = true;
+            if (value == currentDirectory) return;
+            currentDirectory = value;
+            OnPropertyChanged();
         }
+    }
+
+    public DirectoryViewModel[] Tree
+    {
+        get => tree;
+        set
+        {
+            if (Equals(value, tree)) return;
+            tree = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }
