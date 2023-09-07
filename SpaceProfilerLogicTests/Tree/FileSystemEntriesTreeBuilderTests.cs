@@ -26,7 +26,7 @@ public class FileSystemEntriesTreeBuilderTests
     public void EmptyDirectory()
     {
         var expected = new FileSystemEntryTree(new DirectoryEntry(root, root));
-        var actual = FileSystemEntriesTreeBuilder.Build(root);
+        var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected);
     }
 
@@ -43,7 +43,7 @@ public class FileSystemEntriesTreeBuilderTests
         };
         var expected = new FileSystemEntryTree(entry);
         
-        var actual = FileSystemEntriesTreeBuilder.Build(root);
+        var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
@@ -68,7 +68,7 @@ public class FileSystemEntriesTreeBuilderTests
             }
         });
         
-        var actual = FileSystemEntriesTreeBuilder.Build(root);
+        var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
@@ -133,8 +133,16 @@ public class FileSystemEntriesTreeBuilderTests
             }
         });
         
-        var actual = FileSystemEntriesTreeBuilder.Build(root);
+        var actual = BuildTree(root);
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
+    }
+
+    private FileSystemEntryTree? BuildTree(string treeRoot)
+    {
+        var watcher = FileSystemEntriesTreeBuilder.Build(treeRoot);
+        Thread.Sleep(100);
+        watcher?.Stop();
+        return watcher?.Tree;
     }
     
     [TearDown]

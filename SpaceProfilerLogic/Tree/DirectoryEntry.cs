@@ -46,4 +46,22 @@ public class DirectoryEntry : FileSystemEntry
     {
         this.size = size;
     }
+
+    public void Update(out bool childrenNeedUpdate)
+    {
+        foreach (var file in Directory.EnumerateFiles(FullName))
+        {
+            var child = new FileEntry(file, Path.GetFileName(file), this);
+            if (AddFile(child))
+                child.SetSize(FileSizeCalculator.GetFileSize(file));
+        }
+        
+        childrenNeedUpdate = false;
+        foreach (var directory in Directory.EnumerateDirectories(FullName))
+        {
+            var child = new DirectoryEntry(directory, Path.GetFileName(directory), this);
+            if (AddSubdirectory(child))
+                childrenNeedUpdate = true;
+        }
+    }
 }

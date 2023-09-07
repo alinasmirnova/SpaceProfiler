@@ -1,9 +1,21 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using SpaceProfilerLogic;
-using SpaceProfilerLogic.Tree;
 
 var directory = Console.ReadLine();
 
-var tree = FileSystemEntriesTreeBuilder.Build(directory);
-Console.WriteLine(tree == null ? $"Can not open directory:{directory}" : $"Total size: {tree.Root.Size}");
+var treeWatcher = FileSystemEntriesTreeBuilder.Build(directory);
+if (treeWatcher == null)
+{
+    Console.WriteLine("Can not open directory");
+    return -1;
+}
+
+Console.WriteLine("Main thread goes to sleep");
+Thread.Sleep(10000);
+
+treeWatcher.Stop();
+
+Console.WriteLine($"Total size: {treeWatcher.Tree.Root.Size}");
+return 0;
+

@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using SpaceProfiler.ViewModel;
 using SpaceProfilerLogic;
-using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler
 {
@@ -15,8 +14,9 @@ namespace SpaceProfiler
             InitializeComponent();
 
             var currentDirectory = "C:\\Users\\alina\\Pictures";
-            var tree = FileSystemEntriesTreeBuilder.Build(currentDirectory);
-            var viewModel = new MainWindowViewModel(tree);
+            var treeWatcher = FileSystemEntriesTreeBuilder.Build(currentDirectory);
+            var viewModel = new MainWindowViewModel(treeWatcher.Tree);
+            
             DataContext = viewModel;
         }
     }
