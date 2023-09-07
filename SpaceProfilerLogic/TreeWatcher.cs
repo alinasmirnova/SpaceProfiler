@@ -7,6 +7,7 @@ public class TreeWatcher
 {
     private readonly ConcurrentQueue<DirectoryEntry> changesQueue;
     private readonly Thread[] workers;
+    private readonly ConcurrentDictionary<DirectoryEntry, byte> updated;
     public FileSystemEntryTree Tree { get; }
 
     private bool stopped = true;
@@ -14,6 +15,7 @@ public class TreeWatcher
     public TreeWatcher(FileSystemEntryTree tree)
     {
         Tree = tree;
+        updated = new ConcurrentDictionary<DirectoryEntry, byte>();
         changesQueue = new ConcurrentQueue<DirectoryEntry>();
         changesQueue.Enqueue(tree.Root);
         workers = new[] { CreateWorkerThread(), CreateWorkerThread() };
@@ -28,6 +30,18 @@ public class TreeWatcher
         return workerThread;
     }
 
+    public DirectoryEntry[] FlushUpdated()
+    {
+        var result = new List<DirectoryEntry>();
+        foreach (var u in updated)
+        {
+            if (updated.TryRemove(u))
+                result.Add(u.Key);
+            
+        }
+        return result.ToArray();
+    } 
+
     private void ProcessChanges()
     {
         while (!stopped)
@@ -37,6 +51,8 @@ public class TreeWatcher
                 Console.WriteLine($"Thread {Environment.CurrentManagedThreadId} processing directory {directory.Name}");
                 
                 directory.Update(out var childrenNeedUpdate);
+                updated.TryAdd(directory, 1);
+                
                 if (childrenNeedUpdate)
                     foreach (var subdirectory in directory.Subdirectories)
                     {

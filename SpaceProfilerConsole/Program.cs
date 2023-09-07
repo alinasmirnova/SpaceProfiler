@@ -17,5 +17,6 @@ Thread.Sleep(10000);
 treeWatcher.Stop();
 
 Console.WriteLine($"Total size: {treeWatcher.Tree.Root.Size}");
+Console.WriteLine(treeWatcher.FlushUpdated().Length);
 return 0;
 
