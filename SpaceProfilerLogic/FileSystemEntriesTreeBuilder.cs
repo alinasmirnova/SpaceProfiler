@@ -1,4 +1,6 @@
-﻿namespace SpaceProfilerLogic.Tree;
+﻿using SpaceProfilerLogic.Tree;
+
+namespace SpaceProfilerLogic;
 
 public static class FileSystemEntriesTreeBuilder
 {
@@ -15,9 +17,9 @@ public static class FileSystemEntriesTreeBuilder
 
     private static void Fill(FileSystemEntryTree tree)
     {
-        var stack = new Queue<DirectoryEntry>();
-        stack.Enqueue(tree.Root);
-        while (stack.TryPeek(out var current))
+        var queue = new Queue<DirectoryEntry>();
+        queue.Enqueue(tree.Root);
+        while (queue.TryPeek(out var current))
         {
             foreach (var file in Directory.EnumerateFiles(current.FullName))
             {
@@ -30,10 +32,10 @@ public static class FileSystemEntriesTreeBuilder
             {
                 var child = new DirectoryEntry(directory, Path.GetFileName(directory), current);
                 if (current.AddSubdirectory(child))
-                    stack.Enqueue(child);
+                    queue.Enqueue(child);
             }
             
-            stack.Dequeue();
+            queue.Dequeue();
         }
     }
 }

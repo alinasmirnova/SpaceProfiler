@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using SpaceProfilerLogic;
 using SpaceProfilerLogic.Tree;
 
 var directory = Console.ReadLine();

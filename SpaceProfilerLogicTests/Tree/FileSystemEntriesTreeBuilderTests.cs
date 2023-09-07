@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Newtonsoft.Json;
+using SpaceProfilerLogic;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfilerLogicTests.Tree;
