@@ -27,9 +27,9 @@ public class FileWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Created, Path.GetFullPath(root), "1"),
+            new (GetFullPath("1"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -45,10 +45,9 @@ public class FileWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Created, Path.GetFullPath(root), "1"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath(root), "1"),
+            new (GetFullPath("1"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -72,12 +71,11 @@ public class FileWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Changed, Path.GetFullPath($"{root}"), "destination"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "toMove"),
-            new (WatcherChangeTypes.Created, Path.GetFullPath($"{root}"), "destination\\toMove"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath($"{root}"), "destination"),
+            new (GetFullPath("destination"), ChangeType.Update),
+            new (GetFullPath("toMove"), ChangeType.Delete),
+            new (GetFullPath("destination\\toMove"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -101,9 +99,9 @@ public class FileWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Created, Path.GetFullPath($"{root}\\destination"), "toMove"),
+            new (GetFullPath("destination\\toMove"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -120,9 +118,9 @@ public class FileWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1"),
+            new (GetFullPath("1"), ChangeType.Delete),
         };
         
         actual.Should().BeEquivalentTo(expected);
@@ -142,16 +140,13 @@ public class FileWatcherTests
         Thread.Sleep(200);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Changed, Path.GetFullPath($"{root}"), "1"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1\\1f"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1\\2\\2f"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath($"{root}"), "1\\2"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1\\2"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1\\3"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath($"{root}"), "1"),
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath($"{root}"), "1"),
+            new (GetFullPath("1"), ChangeType.Delete),
+            new (GetFullPath("1\\1f"), ChangeType.Delete),
+            new (GetFullPath("1\\2\\2f"), ChangeType.Delete),
+            new (GetFullPath("1\\2"), ChangeType.Delete),
+            new (GetFullPath("1\\3"), ChangeType.Delete),
         };
         
         actual.Should().BeEquivalentTo(expected);
@@ -170,9 +165,9 @@ public class FileWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Deleted, Path.GetFullPath(root), "1\\1f"),
+            new (GetFullPath("1\\1f"), ChangeType.Delete),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -190,17 +185,18 @@ public class FileWatcherTests
         Thread.Sleep(100);
         
         var actual = watcher.FlushChanges();
-
-        var expected = new List<FileSystemEventArgs>
+        var expected = new List<Change>
         {
-            new (WatcherChangeTypes.Changed, Path.GetFullPath(root), "1"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath(root), "1\\1f"),
-            new (WatcherChangeTypes.Changed, Path.GetFullPath(root), "1"),
+            new (GetFullPath("1"), ChangeType.Update),
+            new (GetFullPath("1\\1f"), ChangeType.Update),
         };
+
 
         actual.Should().BeEquivalentTo(expected);
     }
-    
+
+    private string GetFullPath(string path) => Path.GetFullPath(Path.Combine(root, path));
+
     [TearDown]
     public void TearDown()
     {

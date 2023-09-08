@@ -6,7 +6,7 @@ public class DirectoryWatcher
 {
     private FileSystemWatcher? watcher;
 
-    private readonly ConcurrentQueue<FileSystemEventArgs> changes = new();
+    private readonly Queue<FileSystemEventArgs> changesQueue = new();
 
     public void Start(string root)
     {
@@ -44,35 +44,47 @@ public class DirectoryWatcher
         watcher.Renamed -= OnRenamed;
     }
 
-    public List<FileSystemEventArgs> FlushChanges()
+    public List<Change> FlushChanges()
     {
-        var result = new List<FileSystemEventArgs>();
-        var count = changes.Count;
+        var count = changesQueue.Count;
+        var merger = new ChangesMerger();
+        
         for (var i = 0; i < count; i++)
         {
-            if(changes.TryDequeue(out var change))
-                result.Add(change);
+            if (!changesQueue.TryDequeue(out var change)) continue;
+
+            //todo: process rename quicker
+            var oldPath = (change as RenamedEventArgs)?.OldFullPath;
+            if (oldPath != null)
+            {
+                merger.Push(new Change(oldPath, ChangeType.Delete));
+                merger.Push(new Change(change.FullPath, ChangeType.Create));
+            }
+            else
+            {
+                merger.Push(new Change(change));
+            }
         }
-        return result;
+        return merger.Merged;
     }
 
     public void OnChanged(object sender, FileSystemEventArgs e)
     {
-        changes.Enqueue(e);
+        changesQueue.Enqueue(e);
     }
 
     public void OnCreated(object sender, FileSystemEventArgs e)
     {
-        changes.Enqueue(e);
+        changesQueue.Enqueue(e);
     }
 
     public void OnDeleted(object sender, FileSystemEventArgs e)
     {
-        changes.Enqueue(e);
+        changesQueue.Enqueue(e);
     }
 
     public void OnRenamed(object sender, RenamedEventArgs e)
     {
-        changes.Enqueue(e);
+        changesQueue.Enqueue(e);
     }
 }
