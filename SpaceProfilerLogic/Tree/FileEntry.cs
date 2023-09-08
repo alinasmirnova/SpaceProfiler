@@ -2,11 +2,11 @@
 
 public class FileEntry : FileSystemEntry
 {
-    public FileEntry(string fullName, string? name, FileSystemEntry? parent) : base(fullName, name, parent)
+    public FileEntry(string fullName, FileSystemEntry? parent) : base(fullName, parent)
     {
     }
     
-    public FileEntry(string fullName, string? name, long size) : base(fullName, name)
+    public FileEntry(string fullName, long size) : base(fullName)
     {
         this.size = size;
     }

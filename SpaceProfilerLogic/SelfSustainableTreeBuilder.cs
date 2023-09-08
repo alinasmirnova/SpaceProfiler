@@ -9,7 +9,7 @@ public static class SelfSustainableTreeBuilder
         if (!Directory.Exists(rootDirectory))
             throw new ArgumentException("Directory not exist");
         
-        var root = new DirectoryEntry(rootDirectory, Path.GetFileName(rootDirectory));
+        var root = new DirectoryEntry(rootDirectory);
         var tree = new FileSystemEntryTree(root);
         var treeWatcher = new SelfSustainableTree(tree);
         return treeWatcher;

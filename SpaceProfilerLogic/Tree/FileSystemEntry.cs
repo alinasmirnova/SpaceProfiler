@@ -10,15 +10,15 @@ public class FileSystemEntry
 
     public FileSystemEntry? Parent { get; set; }
 
-    protected FileSystemEntry(string fullName, string? name, FileSystemEntry? parent = null)
+    protected FileSystemEntry(string fullName, FileSystemEntry? parent = null)
     {
         FullName = fullName;
-        Name = name ?? fullName;
+        Name = Path.GetFileName(fullName);
         Parent = parent;
     }
 
     public override string ToString()
     {
-        return Name ?? "null";
+        return Name;
     }
 }

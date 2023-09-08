@@ -38,11 +38,11 @@ public class DirectoryEntry : FileSystemEntry
     public bool AddSubdirectory(DirectoryEntry directoryEntry) =>
         subdirectories.TryAdd(directoryEntry.Name, directoryEntry);
 
-    public DirectoryEntry(string fullName, string? name, FileSystemEntry? parent = null) : base(fullName, name, parent)
+    public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
     {
     }
     
-    public DirectoryEntry(string fullName, string? name, long size) : base(fullName, name)
+    public DirectoryEntry(string fullName, long size) : base(fullName)
     {
         this.size = size;
     }
@@ -51,7 +51,7 @@ public class DirectoryEntry : FileSystemEntry
     {
         foreach (var file in Directory.EnumerateFiles(FullName))
         {
-            var child = new FileEntry(file, Path.GetFileName(file), this);
+            var child = new FileEntry(file, this);
             if (AddFile(child))
                 child.SetSize(FileSizeCalculator.GetFileSize(file));
         }
@@ -59,7 +59,7 @@ public class DirectoryEntry : FileSystemEntry
         childrenNeedUpdate = false;
         foreach (var directory in Directory.EnumerateDirectories(FullName))
         {
-            var child = new DirectoryEntry(directory, Path.GetFileName(directory), this);
+            var child = new DirectoryEntry(directory, this);
             if (AddSubdirectory(child))
                 childrenNeedUpdate = true;
         }
