@@ -19,7 +19,7 @@ public class FileSystemEntriesTreeBuilderTests
     [Test]
     public void DirectoryNotExist()
     {
-        Assert.That(() => SelfSustainableTreeBuilder.Build("Unknown"), Throws.ArgumentException);
+        Assert.That(() => new SelfSustainableTree("Unknown"), Throws.ArgumentException);
     }
 
     [Test]
@@ -136,9 +136,9 @@ public class FileSystemEntriesTreeBuilderTests
         actual.Should().BeEquivalentTo(expected, options => options.IgnoringCyclicReferences());
     }
 
-    private DirectoryEntry BuildTree(string treeRoot)
+    private DirectoryEntry? BuildTree(string treeRoot)
     {
-        var tree = SelfSustainableTreeBuilder.Build(treeRoot);
+        var tree = new SelfSustainableTree(treeRoot);
         tree.StartSynchronization();
         Thread.Sleep(100);
         tree.StopSynchronization();

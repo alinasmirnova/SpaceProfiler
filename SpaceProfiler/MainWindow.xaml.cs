@@ -34,7 +34,7 @@ namespace SpaceProfiler
                 viewModel.CurrentDirectory = dialog.SelectedPath;
                 tree?.StopSynchronization();
 
-                tree = SelfSustainableTreeBuilder.Build(dialog.SelectedPath);
+                tree = new SelfSustainableTree(dialog.SelectedPath);
                 tree.StartSynchronization();
                 viewModel.Tree = new[] { new DirectoryViewModel(tree.Root) };
             }

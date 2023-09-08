@@ -2,7 +2,7 @@
 
 public class FileEntry : FileSystemEntry
 {
-    public FileEntry(string fullName, FileSystemEntry? parent) : base(fullName, parent)
+    public FileEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
     {
     }
     

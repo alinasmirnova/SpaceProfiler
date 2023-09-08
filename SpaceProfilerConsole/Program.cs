@@ -3,16 +3,17 @@
 using SpaceProfilerLogic;
 
 var directory = Console.ReadLine();
+if (!Directory.Exists(directory))
+    return -1;
 
-var treeWatcher = SelfSustainableTreeBuilder.Build(directory);
-treeWatcher.StartSynchronization();
+var tree = new SelfSustainableTree(directory);
+tree.StartSynchronization();
 
-Console.WriteLine("Main thread goes to sleep");
 Thread.Sleep(10000);
 
-treeWatcher.StopSynchronization();
+tree.StopSynchronization();
 
-Console.WriteLine($"Total size: {treeWatcher.Root.Size}");
-Console.WriteLine(treeWatcher.FlushUpdated().Length);
+Console.WriteLine($"Total size: {tree.Root.Size}");
+Console.WriteLine(tree.GetChangedNodes().Length);
 return 0;
 
