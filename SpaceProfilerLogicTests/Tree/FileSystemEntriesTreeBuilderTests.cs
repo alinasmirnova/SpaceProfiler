@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Newtonsoft.Json;
 using SpaceProfilerLogic;
 using SpaceProfilerLogic.Tree;
+using SpaceProfilerLogicTests.TestHelpers;
 
 namespace SpaceProfilerLogicTests.Tree;
 
