@@ -6,7 +6,7 @@ namespace SpaceProfilerLogic;
 
 public class SelfSustainableTree
 {
-    private readonly FileSystemEntryTree tree = new();
+    private readonly FileSystemEntryTree? tree;
     private readonly string rootFullPath;
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
     private readonly ConcurrentQueue<Change> changesToApply = new();
@@ -16,7 +16,7 @@ public class SelfSustainableTree
     private readonly List<Thread> workers = new();
     private readonly DirectoryWatcher.DirectoryWatcher directoryWatcher;
 
-    public DirectoryEntry? Root => tree.Root;
+    public DirectoryEntry? Root => tree?.Root;
 
     public SelfSustainableTree(string rootFullPath)
     {
@@ -24,6 +24,7 @@ public class SelfSustainableTree
             throw new ArgumentException(nameof(rootFullPath));
         
         this.rootFullPath = rootFullPath;
+        tree = new FileSystemEntryTree(rootFullPath);
         directoryWatcher = new DirectoryWatcher.DirectoryWatcher();
         AddBackgroundWorker(LoadFromDisk);
         AddBackgroundWorker(WatchChanges);

@@ -4,9 +4,18 @@ namespace SpaceProfilerLogic.Tree;
 
 public class FileSystemEntryTree
 {
-    public DirectoryEntry? Root { get; private set; }
+    public DirectoryEntry Root { get; }
 
     private readonly Dictionary<string, FileSystemEntry> nodes = new();
+
+    public FileSystemEntryTree(string fullRootName)
+    {
+        if (!Directory.Exists(fullRootName))
+            throw new ArgumentException(nameof(fullRootName));
+        
+        Root = new DirectoryEntry(fullRootName);
+        nodes.Add(fullRootName, Root);
+    }
 
     public FileSystemEntry?[] Apply(Change change)
     {
@@ -25,11 +34,8 @@ public class FileSystemEntryTree
 
     private FileSystemEntry?[] Create(string fullPath)
     {
-        if (nodes.ContainsKey(fullPath))
-            return new FileSystemEntry[0];
-
-        if (Root == null && Directory.Exists(fullPath))
-            return new[] { CreateRoot(fullPath) };
+        if (nodes.ContainsKey(fullPath) || !fullPath.StartsWith(Root.FullName))
+            return Array.Empty<FileSystemEntry>();
 
         if (Directory.Exists(fullPath))
             return new[] { CreateDirectory(fullPath) };
@@ -37,14 +43,7 @@ public class FileSystemEntryTree
         if (File.Exists(fullPath))
             return CreateFile(fullPath);
 
-        return new FileSystemEntry[0];
-    }
-
-    private FileSystemEntry CreateRoot(string fullPath)
-    {
-        Root = new DirectoryEntry(fullPath);
-        nodes.Add(fullPath, Root);
-        return Root;
+        return Array.Empty<FileSystemEntry>();
     }
 
     private DirectoryEntry? CreateDirectory(string fullPath)
