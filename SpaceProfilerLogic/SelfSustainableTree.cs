@@ -17,7 +17,6 @@ public class SelfSustainableTree
     private readonly DirectoryWatcher.DirectoryWatcher directoryWatcher;
 
     public DirectoryEntry? Root => tree?.Root;
-    public bool? RootExists => tree?.RootExists;
 
     public SelfSustainableTree(string rootFullPath)
     {

@@ -6,7 +6,6 @@ namespace SpaceProfilerLogic.Tree;
 public class FileSystemEntryTree
 {
     public DirectoryEntry? Root { get; set; }
-    public bool RootExists = true;
 
     private readonly ConcurrentDictionary<string, FileSystemEntry> nodes = new();
 
@@ -107,7 +106,6 @@ public class FileSystemEntryTree
             {
                 var result = Root;
                 Root = null;
-                RootExists = false;
                 nodes.Clear();
                 return new FileSystemEntry[] { result };
             }
