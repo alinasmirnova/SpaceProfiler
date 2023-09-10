@@ -4,5 +4,5 @@ public enum ChangeType
 {
     Create = 0,
     Update = 1,
-    Delete = 3,
+    Delete = 2,
 }
