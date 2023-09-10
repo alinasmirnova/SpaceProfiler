@@ -53,7 +53,6 @@ public class DirectoryWatcher
         {
             if (!changesQueue.TryDequeue(out var change)) continue;
 
-            //todo: process rename quicker
             var oldPath = (change as RenamedEventArgs)?.OldFullPath;
             if (oldPath != null)
             {
