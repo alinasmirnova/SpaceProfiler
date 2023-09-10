@@ -5,7 +5,7 @@ using SpaceProfilerLogicTests.TestHelpers;
 
 namespace SpaceProfilerLogicTests.Tree;
 
-public class FileSystemEntriesTreeBuilderTests
+public class SelfSustainableTreeTests
 {
     private FileSystemHelper helper = null!;
     private const string root = "TestData";

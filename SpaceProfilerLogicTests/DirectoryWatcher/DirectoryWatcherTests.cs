@@ -2,19 +2,19 @@
 using SpaceProfilerLogic.DirectoryWatcher;
 using SpaceProfilerLogicTests.TestHelpers;
 
-namespace SpaceProfilerLogicTests.FileWatcher;
+namespace SpaceProfilerLogicTests.DirectoryWatcher;
 
-public class FileWatcherTests
+public class DirectoryWatcherTests
 {
     private FileSystemHelper helper = null!;
     private const string root = "TestData";
-    private DirectoryWatcher watcher = null!;
+    private SpaceProfilerLogic.DirectoryWatcher.DirectoryWatcher watcher = null!;
     
     [SetUp]
     public void SetUp()
     {
         helper = new FileSystemHelper(root);
-        watcher = new DirectoryWatcher();
+        watcher = new SpaceProfilerLogic.DirectoryWatcher.DirectoryWatcher();
     }
 
     [Test]
