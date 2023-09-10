@@ -88,7 +88,7 @@ public class FileSystemEntryTree
         var size = FileSizeCalculator.GetFileSize(fullPath);
         var diff = size - file.GetSize;
         if (file.AddSize(diff))
-            return GetCurrentAndParents(file.Parent);
+            return GetCurrentAndParents(file);
 
         return Array.Empty<FileSystemEntry>();
     }
