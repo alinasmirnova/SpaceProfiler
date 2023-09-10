@@ -4,14 +4,14 @@ using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfilerLogic;
 
-public class SelfSustainableTree
+public class SelfSustainableTree : IDisposable
 {
     private readonly FileSystemEntryTree? tree;
     private readonly string rootFullPath;
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
     private readonly ConcurrentQueue<Change> changesToApply = new();
     
-    private bool active = false;
+    private bool active;
 
     private readonly List<Thread> workers = new();
     private readonly DirectoryWatcher.DirectoryWatcher directoryWatcher;
@@ -30,24 +30,15 @@ public class SelfSustainableTree
         AddBackgroundWorker(WatchChanges);
         AddBackgroundWorker(ApplyChanges);
         AddBackgroundWorker(ApplyChanges);
-    }
-    
-    public void StartSynchronization()
-    {
+
         active = true;
-        directoryWatcher.Start(rootFullPath);
+        directoryWatcher.Start(this.rootFullPath);
         foreach (var worker in workers)
         {
             worker.Start();
         }
     }
-
-    public void StopSynchronization()
-    {
-        active = false;
-        directoryWatcher.Stop();
-    }
-
+    
     public FileSystemEntry[] GetChangedNodes()
     {
         var result = new List<FileSystemEntry>();
@@ -118,5 +109,16 @@ public class SelfSustainableTree
         
         if (active)
             thread.Start();
+    }
+
+    public void Dispose()
+    {
+        StopSynchronization();
+    }
+
+    public void StopSynchronization()
+    {
+        active = false;
+        directoryWatcher.Stop();
     }
 }

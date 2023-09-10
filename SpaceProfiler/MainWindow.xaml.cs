@@ -32,10 +32,9 @@ namespace SpaceProfiler
             if (dialog.ShowDialog()!.Value)
             {
                 viewModel.CurrentDirectory = dialog.SelectedPath;
-                tree?.StopSynchronization();
-
+                tree?.Dispose();
+                
                 tree = new SelfSustainableTree(dialog.SelectedPath);
-                tree.StartSynchronization();
                 viewModel.Tree = new[] { new DirectoryViewModel(tree.Root) };
             }
         } 

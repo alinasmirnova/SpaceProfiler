@@ -6,12 +6,9 @@ var directory = Console.ReadLine();
 if (!Directory.Exists(directory))
     return -1;
 
-var tree = new SelfSustainableTree(directory);
-tree.StartSynchronization();
+using var tree = new SelfSustainableTree(directory);
 
 Thread.Sleep(10000);
-
-tree.StopSynchronization();
 
 Console.WriteLine($"Total size: {tree.Root.GetSize}");
 Console.WriteLine(tree.GetChangedNodes().Length);

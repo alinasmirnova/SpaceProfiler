@@ -136,7 +136,6 @@ public class SelfSustainableTreeTests
     public void EmptyDirectoryAdded()
     {
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         DoWithDelay(() => helper.CreateDirectory("1"));
         actual.StopSynchronization();
 
@@ -155,7 +154,6 @@ public class SelfSustainableTreeTests
     public void NotEmptyDirectoryAdded()
     {
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         DoWithDelay(() => helper.CreateDirectoryWithFiles("1", 1000, "1f"));
         actual.StopSynchronization();
 
@@ -180,7 +178,6 @@ public class SelfSustainableTreeTests
     public void FileAdded()
     {
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         DoWithDelay(() => helper.CreateFile("1f", 1000));
         actual.StopSynchronization();
 
@@ -201,7 +198,6 @@ public class SelfSustainableTreeTests
         helper.CreateDirectory("1");
         
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         Thread.Sleep(100);
         
         var created = new DirectoryEntry(root, 0)
@@ -225,7 +221,6 @@ public class SelfSustainableTreeTests
         helper.CreateDirectoryWithFiles("1", 1000, "1f");
         
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         Thread.Sleep(100);
         
         var created = new DirectoryEntry(root, 1000)
@@ -255,7 +250,6 @@ public class SelfSustainableTreeTests
         helper.CreateDirectoryWithFiles("1", 1000, "1f");
         
         var actual = new SelfSustainableTree(root);
-        actual.StartSynchronization();
         Thread.Sleep(100);
         
         var created = new DirectoryEntry(root, 1000)
@@ -288,7 +282,6 @@ public class SelfSustainableTreeTests
     private DirectoryEntry? BuildTree(string treeRoot)
     {
         var tree = new SelfSustainableTree(treeRoot);
-        tree.StartSynchronization();
         Thread.Sleep(100);
         tree.StopSynchronization();
         return tree.Root;

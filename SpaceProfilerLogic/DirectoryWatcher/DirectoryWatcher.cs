@@ -35,7 +35,7 @@ public class DirectoryWatcher
 
     public void Stop()
     {
-        if (watcher == null) return;
+        if (watcher is not { EnableRaisingEvents: true }) return;
         watcher.EnableRaisingEvents = false;
         
         watcher.Changed -= OnChanged;
