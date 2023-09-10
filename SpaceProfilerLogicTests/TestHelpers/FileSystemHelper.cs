@@ -27,6 +27,12 @@ public class FileSystemHelper
 
     public void Delete(string path)
     {
+        if (path == Root)
+        {
+            Clear();
+            return;
+        }
+            
         var fullPath = Path.GetFullPath(path, Root);
         if (File.Exists(fullPath))
             File.Delete(fullPath);

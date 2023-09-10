@@ -22,7 +22,18 @@ public class DirectoryEntry : FileSystemEntry
     public bool AddFile(FileEntry file)
     {
         file.Parent = this;
-        return files.TryAdd(file.Name, file);
+        if (files.TryAdd(file.Name, file))
+            return AddSize(file.GetSize);
+        return false;
+    }
+    
+    public bool RemoveFile(FileSystemEntry file)
+    {
+        if (!files.TryRemove(file.Name, out _))
+            return false;
+
+        file.Parent = null;
+        return AddSize(-file.GetSize);
     }
 
     private readonly ConcurrentDictionary<string, DirectoryEntry> subdirectories = new();
@@ -39,10 +50,19 @@ public class DirectoryEntry : FileSystemEntry
         }
     }
 
-    public bool AddSubdirectory(DirectoryEntry directoryEntry)
+    public bool AddEmptySubdirectory(DirectoryEntry directoryEntry)
     {
         directoryEntry.Parent = this;
         return subdirectories.TryAdd(directoryEntry.Name, directoryEntry);
+    }
+    
+    public bool RemoveSubdirectory(FileSystemEntry directoryEntry)
+    {
+        if (!subdirectories.TryRemove(directoryEntry.Name, out _))
+            return false;
+
+        directoryEntry.Parent = null;
+        return AddSize(-directoryEntry.GetSize);
     }
 
     public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
@@ -51,6 +71,6 @@ public class DirectoryEntry : FileSystemEntry
     
     public DirectoryEntry(string fullName, long size) : base(fullName)
     {
-        this.size = size;
+        Size = size;
     }
 }

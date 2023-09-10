@@ -13,7 +13,7 @@ Thread.Sleep(10000);
 
 tree.StopSynchronization();
 
-Console.WriteLine($"Total size: {tree.Root.Size}");
+Console.WriteLine($"Total size: {tree.Root.GetSize}");
 Console.WriteLine(tree.GetChangedNodes().Length);
 return 0;
 
