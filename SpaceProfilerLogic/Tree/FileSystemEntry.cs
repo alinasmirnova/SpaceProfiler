@@ -22,7 +22,7 @@ public class FileSystemEntry
         if (diff == 0)
             return false;
 
-        Size  += diff;
+        Size += diff;
         var parent = Parent;
         while (parent != null)
         {
