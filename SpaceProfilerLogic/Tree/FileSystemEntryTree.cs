@@ -21,17 +21,13 @@ public class FileSystemEntryTree
 
     public FileSystemEntry?[] Apply(Change change)
     {
-        switch (change.Type)
+        return change.Type switch
         {
-            case ChangeType.Create:
-                return Create(change.FullName);
-            case ChangeType.Update:
-                return Update(change.FullName);
-            case ChangeType.Delete:
-                return Delete(change.FullName);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(change.Type));
-        }
+            ChangeType.Create => Create(change.FullName),
+            ChangeType.Update => Update(change.FullName),
+            ChangeType.Delete => Delete(change.FullName),
+            _ => throw new ArgumentOutOfRangeException(nameof(change.Type))
+        };
     }
 
     private FileSystemEntry?[] Create(string fullPath)
