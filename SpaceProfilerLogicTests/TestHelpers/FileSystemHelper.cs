@@ -53,6 +53,12 @@ public class FileSystemHelper
     {
         CreateDirectoryInternal(Path.GetFullPath(path, Root));
     }
+    
+    public void CreateDirectoryWithFiles(string path, long fileSize, params string[] fileNames)
+    {
+        CreateDirectoryInternal(Path.GetFullPath(path, Root));
+        CreateFiles(fileSize, fileNames.Select(n => $"{path}\\{n}").ToArray());
+    }
 
     public void ChangeAccessRights(string path)
     {

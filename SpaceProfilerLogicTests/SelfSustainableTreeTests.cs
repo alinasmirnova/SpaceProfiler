@@ -3,7 +3,7 @@ using SpaceProfilerLogic;
 using SpaceProfilerLogic.Tree;
 using SpaceProfilerLogicTests.TestHelpers;
 
-namespace SpaceProfilerLogicTests.Tree;
+namespace SpaceProfilerLogicTests;
 
 public class SelfSustainableTreeTests
 {
@@ -49,8 +49,7 @@ public class SelfSustainableTreeTests
     [Test]
     public void SubDirectory()
     {
-        helper.CreateDirectory("1");
-        helper.CreateFiles(1000, "1\\1f", "1\\2f");
+        helper.CreateDirectoryWithFiles("1", 1000, "1f", "2f");
 
         var expected = new DirectoryEntry(root, 2000)
         {
@@ -76,16 +75,13 @@ public class SelfSustainableTreeTests
     {
         helper.CreateFiles(1000, "01f", "02f");
         
-        helper.CreateDirectory("1");
-        helper.CreateFiles(1000, "1\\11f", "1\\12f");
+        helper.CreateDirectoryWithFiles("1", 1000, "11f", "12f");
         
         helper.CreateDirectory("2");
         
-        helper.CreateDirectory("3");
-        helper.CreateFiles(1000, "3\\31f", "3\\32f", "3\\33f");
-        helper.CreateDirectory("3\\31");
+        helper.CreateDirectoryWithFiles("3", 1000, "31f", "32f", "33f");
+        helper.CreateDirectoryWithFiles("3\\31", 1000, "311f", "312f");
         helper.CreateDirectory(@"3\31\311");
-        helper.CreateFiles(1000, @"3\31\311f", @"3\31\312f");
 
         var expected = new DirectoryEntry(root, 9000)
         {
