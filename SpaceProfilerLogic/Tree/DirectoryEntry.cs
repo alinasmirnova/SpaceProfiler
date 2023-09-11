@@ -23,7 +23,11 @@ public class DirectoryEntry : FileSystemEntry
     {
         file.Parent = this;
         if (files.TryAdd(file.Name, file))
-            return AddSize(file.GetSize);
+        {
+            AddSize(file.GetSize);
+            return true;
+        }
+
         return false;
     }
     

@@ -59,6 +59,10 @@ public class DirectoryWatcher
                 merger.Push(new Change(oldPath, ChangeType.Delete));
                 merger.Push(new Change(change.FullPath, ChangeType.Create));
             }
+            else if (change.ChangeType == WatcherChangeTypes.Created)
+            {
+                PushCreateRecursively(merger, change);
+            }
             else
             {
                 merger.Push(new Change(change));
@@ -67,6 +71,23 @@ public class DirectoryWatcher
         return merger.Merged;
     }
 
+    private void PushCreateRecursively(ChangesMerger merger, FileSystemEventArgs change)
+    {
+        var queue = new Queue<string>();
+        queue.Enqueue(change.FullPath);
+        while (queue.TryDequeue(out var current))
+        {
+            merger.Push(new Change(current, ChangeType.Create));
+            if (File.Exists(current))
+                continue;
+            
+            foreach (var entry in Directory.EnumerateFileSystemEntries(current))
+            {
+                queue.Enqueue(entry);
+            }
+        }
+    }
+    
     public void OnChanged(object sender, FileSystemEventArgs e)
     {
         changesQueue.Enqueue(e);

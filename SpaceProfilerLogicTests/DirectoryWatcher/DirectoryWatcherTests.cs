@@ -76,6 +76,11 @@ public class DirectoryWatcherTests
             new (GetFullPath("destination"), ChangeType.Update),
             new (GetFullPath("toMove"), ChangeType.Delete),
             new (GetFullPath("destination\\toMove"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\1f"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\1"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2\\1f"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2\\2f"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
@@ -102,6 +107,11 @@ public class DirectoryWatcherTests
         var expected = new List<Change>
         {
             new (GetFullPath("destination\\toMove"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\1"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2\\1f"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\2\\2f"), ChangeType.Create),
+            new (GetFullPath("destination\\toMove\\1f"), ChangeType.Create),
         };
 
         actual.Should().BeEquivalentTo(expected);
