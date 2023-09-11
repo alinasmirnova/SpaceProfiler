@@ -48,7 +48,7 @@
                     ItemsSource="{Binding Children}"
                 >
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Count}" />
+                        <TextBlock Text="{Binding Text}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>

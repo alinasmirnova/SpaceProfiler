@@ -9,6 +9,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
     private DirectoryEntry? Directory => (DirectoryEntry?)Entry;
     public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.Files.Any())
     {
+        text = string.Empty;
         Count = entry.Files.Length;
     }
 
@@ -21,6 +22,20 @@ public class FilesContainerViewModel : TreeViewItemViewModel
             if (value != count)
             {
                 count = value;
+                Text = $"Files [{Count}]";
+            }
+        }
+    }
+    
+    private string text;
+    public string Text
+    {
+        get => text;
+        set
+        {
+            if (value != text)
+            {
+                text = value;
                 OnPropertyChanged();
             }
         }
