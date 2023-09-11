@@ -35,7 +35,7 @@ public class FileSystemEntryTree
             return Array.Empty<FileSystemEntry>();
 
         if (Directory.Exists(fullPath))
-            return new[] { CreateDirectory(fullPath) };
+            return CreateDirectory(fullPath);
 
         if (File.Exists(fullPath))
             return CreateFile(fullPath);
@@ -43,9 +43,27 @@ public class FileSystemEntryTree
         return Array.Empty<FileSystemEntry>();
     }
 
-    private DirectoryEntry? CreateDirectory(string fullPath)
+    private FileSystemEntry[] CreateDirectory(string fullPath)
     {
-        var parent = FindOrCreateParent(fullPath);
+        var parent = FindOrCreateParent(fullPath, out var createdParents);
+        if (parent == null)
+            throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
+
+        var directory = CreateDirectory(fullPath, parent);
+
+        var result = createdParents.Cast<FileSystemEntry>().ToList();
+        
+        if (directory != null)
+            result.Add(directory);
+        
+        if (directory?.Parent != null)
+            result.Add(directory.Parent);
+
+        return result.ToArray();
+    }
+
+    private DirectoryEntry? CreateDirectory(string fullPath, DirectoryEntry parent)
+    {
         var directory = new DirectoryEntry(fullPath, parent);
         if (parent.AddEmptySubdirectory(directory))
         {
@@ -56,16 +74,66 @@ public class FileSystemEntryTree
         return null;
     }
 
-    private FileSystemEntry?[] CreateFile(string fullPath)
+    private FileSystemEntry[] CreateFile(string fullPath)
     {
-        var parent = FindOrCreateParent(fullPath);
+        var parent = FindOrCreateParent(fullPath, out var createdParents);
+        if (parent == null)
+            throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
+        
         var file = new FileEntry(fullPath, FileSizeCalculator.GetFileSize(fullPath));
         if (!parent.AddFile(file))
-            return new FileSystemEntry?[] { null }; 
+            return createdParents.Cast<FileSystemEntry>().ToArray(); 
         
         nodes.TryAdd(fullPath, file);
 
         return GetCurrentAndParents(file).ToArray();
+    }
+
+    private DirectoryEntry? FindOrCreateParent(string fullPath, out DirectoryEntry[] createdParents)
+    {
+        createdParents = Array.Empty<DirectoryEntry>();
+        
+        var missingParents = GetMissingParents(fullPath, out var closestParent);
+        if (closestParent == null)
+            return null;
+        
+        createdParents = CreateDirectories(missingParents, closestParent);
+
+        var parentName = Path.GetDirectoryName(fullPath);
+        if (parentName == null || !nodes.ContainsKey(parentName))
+            throw new KeyNotFoundException($"Failed to find parent node for path {fullPath}");
+        
+        return (DirectoryEntry)nodes[parentName];
+    }
+    
+    private string[] GetMissingParents(string fullName, out DirectoryEntry? closestParent)
+    {
+        var result = new List<string>();
+        var current = Path.GetDirectoryName(fullName);
+        while (current != null && !nodes.ContainsKey(current))
+        {
+            result.Add(current);
+            current = Path.GetDirectoryName(fullName);
+        }
+
+        closestParent = current == null ? null : (DirectoryEntry)nodes[current];
+        return result.ToArray();
+    }
+    
+    private DirectoryEntry[] CreateDirectories(string[] fullNames, DirectoryEntry parent)
+    {
+        var created = new List<DirectoryEntry>();
+        for (var index = fullNames.Length - 1; index >= 0; index--)
+        {
+            var fullName = fullNames[index];
+            var directory = CreateDirectory(fullName, parent);
+            if (directory == null)
+                break;
+            
+            created.Add(directory);
+        }
+
+        return created.ToArray();
     }
 
     private FileSystemEntry?[] Update(string fullPath)
@@ -94,6 +162,7 @@ public class FileSystemEntryTree
     }
 
     private readonly object lockForDelete = new();
+
     private FileSystemEntry?[] Delete(string fullPath)
     {
         lock (lockForDelete)
@@ -131,9 +200,9 @@ public class FileSystemEntryTree
         }
     }
 
-    private static FileSystemEntry?[] GetCurrentAndParents(FileSystemEntry? entry)
+    private static FileSystemEntry[] GetCurrentAndParents(FileSystemEntry entry)
     {
-        var updated = new List<FileSystemEntry?> { entry };
+        var updated = new List<FileSystemEntry> { entry };
         var current = entry?.Parent;
         while (current != null)
         {
@@ -142,40 +211,5 @@ public class FileSystemEntryTree
         }
 
         return updated.ToArray();
-    }
-
-    private DirectoryEntry FindOrCreateParent(string fullPath)
-    {
-        var missingParents = GetMissingParents(fullPath);
-        CreateDirectories(missingParents);
-
-        var parentName = Path.GetDirectoryName(fullPath);
-        if (parentName == null || !nodes.ContainsKey(parentName))
-            throw new KeyNotFoundException($"Failed to find parent node for path {fullPath}");
-        
-        return (DirectoryEntry)nodes[parentName];
-    }
-
-    private string[] GetMissingParents(string fullName)
-    {
-        var result = new List<string>();
-        var current = Path.GetDirectoryName(fullName);
-        while (current != null && !nodes.ContainsKey(current))
-        {
-            result.Add(current);
-            current = Path.GetDirectoryName(fullName);
-        }
-
-        return result.ToArray();
-    }
-
-    private void CreateDirectories(string[] fullNames)
-    {
-        for (var index = fullNames.Length - 1; index >= 0; index--)
-        {
-            var fullName = fullNames[index];
-            if (CreateDirectory(fullName) == null)
-                return;
-        }
     }
 }

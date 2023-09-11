@@ -9,7 +9,7 @@ public class DirectoryEntry : FileSystemEntry
     public FileEntry[] Files
     {
         get => files.Values.ToArray();
-        init
+        set
         {
             foreach (var file in value)
             {
@@ -40,7 +40,7 @@ public class DirectoryEntry : FileSystemEntry
     public DirectoryEntry[] Subdirectories
     {
         get => subdirectories.Values.ToArray();
-        init
+        set
         {
             foreach (var subdirectory in value)
             {

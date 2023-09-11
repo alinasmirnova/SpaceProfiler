@@ -55,6 +55,14 @@ public class FileSystemHelper
         stream.Flush();
     }
 
+    public void CreateDirectories(params string[] paths)
+    {
+        foreach (var path in paths)
+        {
+            CreateDirectory(path);
+        }
+    }
+
     public void CreateDirectory(string path)
     {
         CreateDirectoryInternal(Path.GetFullPath(path, Root));
