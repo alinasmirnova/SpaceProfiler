@@ -33,6 +33,8 @@
                 >
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Name}" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="{Binding Size}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate 
@@ -41,6 +43,8 @@
                 >
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Name}" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="{Binding Size}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate 
@@ -49,6 +53,8 @@
                 >
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Text}" />
+                        <TextBlock Text="  " />
+                        <TextBlock Text="{Binding Size}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
