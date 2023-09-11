@@ -5,31 +5,56 @@ namespace SpaceProfiler.ViewModel;
 
 public class DirectoryViewModel : TreeViewItemViewModel
 {
-    private readonly DirectoryEntry entry;
-    public DirectoryViewModel(DirectoryEntry entry) : base(entry.Subdirectories.Any() || entry.Files.Any())
+    private DirectoryEntry Directory => (DirectoryEntry) Entry!;
+    public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.Subdirectories.Any() || entry.Files.Any())
     {
-        this.entry = entry;
     }
 
-    public string Name => entry.Name;
+    public string Name => Directory.Name;
 
     protected override void LoadChildren()
     {
-        foreach (var child in entry.Subdirectories)
+        foreach (var child in Directory.Subdirectories)
         {
             Children?.Add(new DirectoryViewModel(child));
         }
 
-        if (entry.Subdirectories.Any() && entry.Files.Length > 1)
+        if (Directory.Subdirectories.Any() && Directory.Files.Length > 1)
         {
-            Children?.Add(new FilesContainerViewModel(entry.Files));
+            Children?.Add(new FilesContainerViewModel(Directory));
         }
         else
         {
-            foreach (var entryFile in entry.Files)
+            foreach (var entryFile in Directory.Files)
             {
                 Children?.Add(new FileViewModel(entryFile));
             }
         }
     }
+
+    protected override bool HasChildrenChanged()
+    {
+        if (Children == null)
+            return false;
+        
+        var count = Directory.Subdirectories.Length;
+        count += Directory.Files.Length > 1 ? 1 : Directory.Files.Length;
+        if (count != Children.Count)
+            return true;
+
+        if (Directory.Subdirectories.Where((t, i) => Children[i].Entry != t).Any())
+        {
+            return true;
+        }
+
+        if (Directory.Files.Length > 0)
+        {
+            return Directory.Files.Length == 1 && Children.Last().Entry == Directory.Files[0] ||
+                   Children.Last() is FilesContainerViewModel;
+        }
+
+        return false;
+    }
+    
+    protected override bool HasChildren() => Directory.Subdirectories.Any() || Directory.Files.Any();
 }

@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
 
@@ -13,11 +14,30 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     private TreeViewItemViewModel() { }
 
-    protected TreeViewItemViewModel(bool hasChildren)
+    protected TreeViewItemViewModel(FileSystemEntry entry, bool hasChildren)
     {
         Children = new ObservableCollection<TreeViewItemViewModel>();
         if (hasChildren)
             Children.Add(UnloadedChild);
+
+        Entry = entry;
+        Size = entry.GetSize;
+    }
+
+    public FileSystemEntry? Entry { get; }
+    
+    private long size;
+    public long Size
+    {
+        get => size;
+        set
+        {
+            if (value != size)
+            {
+                value = size;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public bool NotFullyLoaded => Children?.Count == 1 && Children[0] == UnloadedChild;
@@ -57,6 +77,30 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     }
 
     protected virtual void LoadChildren() {}
+    protected virtual bool HasChildrenChanged() => false;
+    protected virtual bool HasChildren() => false;
+    public virtual void Update()
+    {
+        if (Entry == null)
+            return;
+        
+        Size = Entry.GetSize;
+        if (HasChildren() && NotFullyLoaded)
+            return;
+
+        if (!HasChildren() && NotFullyLoaded)
+        {
+            Children?.Clear();
+            return;
+        }
+        
+        if (!HasChildrenChanged()) return;
+        
+        IsExpanded = false;
+        Children?.Clear();
+        if (HasChildren())
+            Children?.Add(UnloadedChild);
+    }
     
     #region INotifyPropertyChanged Members
     public event PropertyChangedEventHandler? PropertyChanged;

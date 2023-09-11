@@ -12,7 +12,7 @@
            <Button Width="27" Height="27" Margin="0,0,5,0" Click="SelectDirectoryButton_Click"><Image Margin="1,0" Source="Icons\opened-folder.png" /></Button>
        </StackPanel>
         
-        <TreeView ItemsSource="{Binding Tree}">
+        <TreeView ItemsSource="{Binding Items}">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Windows;
 using Ookii.Dialogs.Wpf;
 using SpaceProfiler.ViewModel;
 using SpaceProfilerLogic;
@@ -12,6 +13,8 @@ namespace SpaceProfiler
     {
         private readonly MainWindowViewModel viewModel;
         private SelfSustainableTree? tree;
+        private bool syncInProgress = false;
+        private readonly Thread background;
         
         public MainWindow()
         {
@@ -19,6 +22,7 @@ namespace SpaceProfiler
 
             viewModel = new MainWindowViewModel();
             DataContext = viewModel;
+            background = new Thread(UpdateTree) { IsBackground = true };
         }
         
         private void SelectDirectoryButton_Click(object sender, RoutedEventArgs e)
@@ -31,12 +35,40 @@ namespace SpaceProfiler
 
             if (dialog.ShowDialog()!.Value)
             {
+                if (dialog.SelectedPath == viewModel.CurrentDirectory)
+                    return;
+                
                 viewModel.CurrentDirectory = dialog.SelectedPath;
                 tree?.Dispose();
                 
                 tree = new SelfSustainableTree(dialog.SelectedPath);
-                viewModel.Tree = new[] { new DirectoryViewModel(tree.Root) };
+                if (tree?.Root != null)
+                {
+                    viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
+                    if (!syncInProgress)
+                    {
+                        background.Start();
+                        syncInProgress = true;
+                    }
+                }
             }
-        } 
+        }
+
+        private void UpdateTree()
+        {
+            while (syncInProgress)
+            {
+                if (tree != null)
+                {
+                    var changes = tree.GetChangedNodes();
+                    var changedNodes = viewModel.GetNodesForUpdate(changes);
+                    foreach (var node in changedNodes)
+                    {
+                        Dispatcher.Invoke(() => { node.Update(); });
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
     }
 }

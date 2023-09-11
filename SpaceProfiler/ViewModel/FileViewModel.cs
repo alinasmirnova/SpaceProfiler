@@ -5,10 +5,10 @@ namespace SpaceProfiler.ViewModel;
 public class FileViewModel : TreeViewItemViewModel
 {
     private readonly FileEntry entry;
-    public FileViewModel(FileEntry entry) : base(false)
+    public FileViewModel(FileEntry entry) : base(entry, false)
     {
         this.entry = entry;
     }
-
-    public string Name => entry.Name ?? entry.FullName;
+    
+    public string Name => entry.Name;
 }

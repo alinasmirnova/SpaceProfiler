@@ -6,7 +6,6 @@ namespace SpaceProfilerLogic;
 
 public class SelfSustainableTree : IDisposable
 {
-    private readonly FileSystemEntryTree? tree;
     private readonly string rootFullPath;
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
     private readonly ConcurrentQueue<Change> changesToApply = new();
@@ -16,7 +15,8 @@ public class SelfSustainableTree : IDisposable
     private readonly List<Thread> workers = new();
     private readonly DirectoryWatcher.DirectoryWatcher directoryWatcher;
 
-    public DirectoryEntry? Root => tree?.Root;
+    public DirectoryEntry? Root => Tree?.Root;
+    public FileSystemEntryTree? Tree { get; }
 
     public SelfSustainableTree(string rootFullPath)
     {
@@ -24,7 +24,7 @@ public class SelfSustainableTree : IDisposable
             throw new ArgumentException(nameof(rootFullPath));
         
         this.rootFullPath = rootFullPath;
-        tree = new FileSystemEntryTree(rootFullPath);
+        Tree = new FileSystemEntryTree(rootFullPath);
         directoryWatcher = new DirectoryWatcher.DirectoryWatcher();
         AddBackgroundWorker(LoadFromDisk);
         AddBackgroundWorker(WatchChanges);
@@ -39,16 +39,16 @@ public class SelfSustainableTree : IDisposable
         }
     }
     
-    public FileSystemEntry[] GetChangedNodes()
+    public HashSet<FileSystemEntry> GetChangedNodes()
     {
-        var result = new List<FileSystemEntry>();
+        var result = new HashSet<FileSystemEntry>();
         foreach (var changedNode in changedNodes)
         {
-            if (changedNodes.TryRemove(changedNode.Key, out var _))
+            if (changedNodes.TryRemove(changedNode.Key, out _))
                 result.Add(changedNode.Key);
         }
 
-        return result.ToArray();
+        return result;
     }
 
     private void WatchChanges()
@@ -69,7 +69,7 @@ public class SelfSustainableTree : IDisposable
         {
             while (changesToApply.TryDequeue(out var change))
             {
-                var changed = tree.Apply(change).Where(e => e != null).Cast<FileSystemEntry>();
+                var changed = Tree.Apply(change).Where(e => e != null).Cast<FileSystemEntry>();
                 foreach (var entry in changed)
                 {
                     changedNodes.AddOrUpdate(entry, 0, (_, _) => 0);
