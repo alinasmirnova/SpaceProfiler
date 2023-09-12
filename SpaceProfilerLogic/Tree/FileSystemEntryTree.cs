@@ -17,7 +17,7 @@ public class FileSystemEntryTree
         fullRootName = fullRootName.TrimEnd('\\');
         
         Root = new DirectoryEntry(fullRootName);
-        nodes.TryAdd(fullRootName, Root);
+        nodes.TryAdd(Root.FullName, Root);
     }
 
     public FileSystemEntry?[] Apply(Change change)
@@ -71,7 +71,7 @@ public class FileSystemEntryTree
         var directory = new DirectoryEntry(fullPath, parent);
         if (parent.AddEmptySubdirectory(directory))
         {
-            nodes.TryAdd(fullPath, directory);
+            nodes.TryAdd(directory.FullName, directory);
             return directory;
         }
 
@@ -93,7 +93,7 @@ public class FileSystemEntryTree
             return result.ToArray();
         } 
         
-        nodes.TryAdd(fullPath, file);
+        nodes.TryAdd(file.FullName, file);
 
         if (file.GetSize > 0)
             return GetCurrentAndParents(file).ToArray();
@@ -124,7 +124,7 @@ public class FileSystemEntryTree
     {
         var result = new List<string>();
         var current = GetParentFullName(fullName);
-        while (current != null && !nodes.ContainsKey(current))
+        while (current != string.Empty && !nodes.ContainsKey(current))
         {
             result.Add(current);
             current = GetParentFullName(current);
