@@ -4,13 +4,14 @@ namespace SpaceProfilerLogic.Tree;
 
 public class DirectoryEntry : FileSystemEntry
 {
-    private readonly ConcurrentDictionary<string, FileEntry> files = new();
+    private ConcurrentDictionary<string, FileEntry> files = new();
 
     public FileEntry[] Files
     {
         get => files.Values.ToArray();
         set
         {
+            files = new ConcurrentDictionary<string, FileEntry>();
             foreach (var file in value)
             {
                 if (files.TryAdd(file.Name, file))
@@ -33,19 +34,23 @@ public class DirectoryEntry : FileSystemEntry
     
     public bool RemoveFile(FileSystemEntry file)
     {
-        if (!files.TryRemove(file.Name, out _))
-            return false;
+        if (files.TryRemove(file.Name, out _))
+        {
+            file.Parent = null;
+            AddSize(-file.GetSize);
+            return true;
+        }
 
-        file.Parent = null;
-        return AddSize(-file.GetSize);
+        return false;
     }
 
-    private readonly ConcurrentDictionary<string, DirectoryEntry> subdirectories = new();
+    private ConcurrentDictionary<string, DirectoryEntry> subdirectories = new();
     public DirectoryEntry[] Subdirectories
     {
         get => subdirectories.Values.ToArray();
         set
         {
+            subdirectories = new ConcurrentDictionary<string, DirectoryEntry>();
             foreach (var subdirectory in value)
             {
                 if (subdirectories.TryAdd(subdirectory.Name, subdirectory))
@@ -62,11 +67,14 @@ public class DirectoryEntry : FileSystemEntry
     
     public bool RemoveSubdirectory(FileSystemEntry directoryEntry)
     {
-        if (!subdirectories.TryRemove(directoryEntry.Name, out _))
-            return false;
+        if (subdirectories.TryRemove(directoryEntry.Name, out _))
+        {
+            directoryEntry.Parent = null;
+            AddSize(-directoryEntry.GetSize);
+            return true;
+        }
 
-        directoryEntry.Parent = null;
-        return AddSize(-directoryEntry.GetSize);
+        return false;
     }
 
     public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)

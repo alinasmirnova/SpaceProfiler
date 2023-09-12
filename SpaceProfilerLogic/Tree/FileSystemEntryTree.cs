@@ -200,7 +200,11 @@ public class FileSystemEntryTree
                 return Array.Empty<FileSystemEntry>();
 
             RemoveFromNodesWithSubElements(fullPath);
-            return GetCurrentAndParents(parent);
+            
+            if (entry.GetSize > 0)
+                return GetCurrentAndParents(parent);
+            
+            return new FileSystemEntry?[] { parent };
         }
     }
 

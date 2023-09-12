@@ -142,12 +142,7 @@ public class SelfSustainableTreeChangesTests
 
         expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize + 1000)
         {
-            Files = new[]
-            {
-                expectedRoot.Files[0],
-                expectedRoot.Files[1],
-                newFile
-            },
+            Files = expectedRoot.Files.Concat(new []{newFile}).ToArray(),
             Subdirectories = expectedRoot.Subdirectories
         };
         
@@ -164,12 +159,7 @@ public class SelfSustainableTreeChangesTests
         
         var newFile = new FileEntry($"{rootFullName}\\3f", 0);
 
-        expectedRoot.Files = new[]
-        {
-            expectedRoot.Files[0],
-            expectedRoot.Files[1],
-            newFile
-        };
+        expectedRoot.Files = expectedRoot.Files.Concat(new[] { newFile }).ToArray();
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
         tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newFile}, o => o.IgnoringCyclicReferences());
@@ -306,6 +296,166 @@ public class SelfSustainableTreeChangesTests
         tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newParent, newFile}, o => o.IgnoringCyclicReferences());
     }
 
+    [Test]
+    public void DeleteFileFromRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1f"));
+
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        {
+            Subdirectories = expectedRoot.Subdirectories,
+            Files = expectedRoot.Files.Where(f => f != oldFile).ToArray()
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot }, o => o.IgnoringCyclicReferences());
+    }
+
+    [Test]
+    public void DeleteFileFromSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1\\11f"));
+
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
+        var oldDir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var newDir1 = new DirectoryEntry(oldDir1.FullName, oldDir1.GetSize - 1000)
+        {
+            Subdirectories = oldDir1.Subdirectories,
+            Files = oldDir1.Files.Where(f => f != oldFile).ToArray()
+        };
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        {
+            Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldDir1).Concat(new []{newDir1}).ToArray(),
+            Files = expectedRoot.Files
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot, newDir1 }, o => o.IgnoringCyclicReferences());
+    }
+    
+    [Test]
+    public void DeleteEmptyFileFromRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("empty"));
+
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\empty")!;
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize)
+        {
+            Subdirectories = expectedRoot.Subdirectories,
+            Files = expectedRoot.Files.Where(f => f != oldFile).ToArray()
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot }, o => o.IgnoringCyclicReferences());
+    }
+
+    [Test]
+    public void DeleteEmptyFileFromSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1\\11\\empty"));
+
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11\\empty")!;
+        var parent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\11")!;
+        parent.Files = parent.Files.Where(f => f != oldFile).ToArray();
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { parent }, o => o.IgnoringCyclicReferences());
+    }
+    
+    [Test]
+    public void DeleteNotEmptyDirectoryFromRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1"));
+
+        var dir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var dir11 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\11")!;
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - dir1.GetSize)
+        {
+            Files = expectedRoot.Files,
+            Subdirectories = expectedRoot.Subdirectories.Where(d => d != dir1).ToArray()
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot, dir1, dir11 },
+                o => o.IgnoringCyclicReferences().Including(f => f.FullName));
+    }
+
+    [Test]
+    public void DeleteNotEmptyDirectoryFromSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1\\11"));
+
+        var dir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var dir11 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\11")!;
+        var newDir1 = new DirectoryEntry(dir1.FullName, dir1.GetSize - dir11.GetSize)
+        {
+            Subdirectories = dir1.Subdirectories.Where(d => d != dir11).ToArray(),
+            Files = dir1.Files
+        };
+        
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - dir11.GetSize)
+        {
+            Files = expectedRoot.Files,
+            Subdirectories = expectedRoot.Subdirectories.Where(d => d != dir1).Concat(new []{newDir1}).ToArray()
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot, newDir1, dir11 },
+                o => o.IgnoringCyclicReferences().Including(f => f.FullName));
+    }
+    
+    [Test]
+    public void DeleteEmptyDirectoryFromRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("2"));
+
+        var dir2 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\2")!;
+        expectedRoot.Subdirectories = expectedRoot.Subdirectories.Where(d => d != dir2).ToArray();
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot },
+                o => o.IgnoringCyclicReferences());
+    }
+
+    [Test]
+    public void DeleteEmptyDirectoryFromSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+
+        DoWithDelay(tree, () => helper.Delete("1\\12"));
+
+        var dir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var dir12 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\12")!;
+        dir1.Subdirectories = dir1.Subdirectories.Where(d => d != dir12).ToArray();
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should()
+            .BeEquivalentTo(new FileSystemEntry[] { dir1 },
+                o => o.IgnoringCyclicReferences().Including(f => f.FullName));
+    }
+    
     /// <summary>
     /// Creates tree
     /// TestData
@@ -324,8 +474,11 @@ public class SelfSustainableTreeChangesTests
     {
         var fileSystemHelper = new FileSystemHelper(root);
         fileSystemHelper.CreateFiles(1000 , "1f", "2f");
+        fileSystemHelper.CreateFile("empty", 0);
         fileSystemHelper.CreateDirectoryWithFiles("1", 1000, "11f", "12f");
+        fileSystemHelper.CreateDirectory("1\\12");
         fileSystemHelper.CreateDirectoryWithFiles("1\\11", 1000, "111f", "112f");
+        fileSystemHelper.CreateFile("1\\11\\empty", 0);
         fileSystemHelper.CreateDirectory(@"2");
         
         var sustainableTree = new SelfSustainableTree(root);
@@ -334,7 +487,7 @@ public class SelfSustainableTreeChangesTests
 
         return (sustainableTree, new DirectoryEntry(root, 6000)
         {
-            Files = new[] { new FileEntry($"{root}\\1f", 1000), new FileEntry($"{root}\\2f", 1000) },
+            Files = new[] { new FileEntry($"{root}\\1f", 1000), new FileEntry($"{root}\\2f", 1000), new FileEntry($"{root}\\empty", 0) },
             Subdirectories = new[]
             {
                 new DirectoryEntry($"{root}\\1", 4000)
@@ -345,8 +498,9 @@ public class SelfSustainableTreeChangesTests
                         new DirectoryEntry($@"{root}\1\11", 2000)
                         {
                             Files = new[]
-                                { new FileEntry($@"{root}\1\11\111f", 1000), new FileEntry($@"{root}\1\11\112f", 1000) }
-                        }
+                                { new FileEntry($@"{root}\1\11\111f", 1000), new FileEntry($@"{root}\1\11\112f", 1000), new FileEntry($@"{root}\1\11\empty", 0) }
+                        },
+                        new DirectoryEntry($@"{root}\1\12", 0),
                     }
                 },
                 new DirectoryEntry($"{root}\\2")
