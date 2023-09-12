@@ -9,6 +9,13 @@ namespace SpaceProfilerLogicTests;
 public class FileSystemEntryTreeTests
 {
     private readonly string rootFullName = Path.GetFullPath("TestData");
+    private FileSystemHelper fileSystemHelper = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        fileSystemHelper = new FileSystemHelper(rootFullName);
+    }
     
     [Test]
     public void AddFileRecursively()
@@ -105,11 +112,16 @@ public class FileSystemEntryTreeTests
     /// <returns></returns>
     private void CreateTreeOnDisk(string root)
     {
-        var fileSystemHelper = new FileSystemHelper(root);
         fileSystemHelper.CreateFiles(1000 , "1f", "2f");
         fileSystemHelper.CreateDirectoryWithFiles("1", 1000, "11f", "12f");
         fileSystemHelper.CreateDirectoryWithFiles("1\\11", 1000, "111f", "112f");
         fileSystemHelper.CreateFile("1\\11\\112f", 0);
         fileSystemHelper.CreateDirectory(@"2");
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        fileSystemHelper.Clear();
     }
 }

@@ -211,7 +211,7 @@ public class SelfSustainableTreeChangesTests
         parent.Files = new[] { newFile };
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
-        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, parent, newFile}, o => o.IgnoringCyclicReferences());
+        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] { parent, newFile }, o => o.IgnoringCyclicReferences());
     }
     
     [Test]
