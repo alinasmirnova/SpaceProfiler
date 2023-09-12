@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.IO;
 using SpaceProfilerLogic.DirectoryWatcher;
 
 namespace SpaceProfilerLogic.Tree;
@@ -13,6 +14,7 @@ public class FileSystemEntryTree
     {
         if (!Directory.Exists(fullRootName))
             throw new ArgumentException(nameof(fullRootName));
+        fullRootName = fullRootName.TrimEnd('\\');
         
         Root = new DirectoryEntry(fullRootName);
         nodes.TryAdd(fullRootName, Root);
@@ -20,11 +22,12 @@ public class FileSystemEntryTree
 
     public FileSystemEntry?[] Apply(Change change)
     {
+        var fullPath = change.FullName.TrimEnd('\\');
         return change.Type switch
         {
-            ChangeType.Create => Create(change.FullName),
-            ChangeType.Update => Update(change.FullName),
-            ChangeType.Delete => Delete(change.FullName),
+            ChangeType.Create => Create(fullPath),
+            ChangeType.Update => Update(fullPath),
+            ChangeType.Delete => Delete(fullPath),
             _ => throw new ArgumentOutOfRangeException(nameof(change.Type))
         };
     }
@@ -110,7 +113,7 @@ public class FileSystemEntryTree
         
         createdParents = CreateDirectories(missingParents, closestParent);
 
-        var parentName = Path.GetDirectoryName(fullPath);
+        var parentName = GetParentFullName(fullPath);
         if (parentName == null || !nodes.ContainsKey(parentName))
             throw new KeyNotFoundException($"Failed to find parent node for path {fullPath}");
         
@@ -120,11 +123,11 @@ public class FileSystemEntryTree
     private string[] GetMissingParents(string fullName, out DirectoryEntry? closestParent)
     {
         var result = new List<string>();
-        var current = Path.GetDirectoryName(fullName);
+        var current = GetParentFullName(fullName);
         while (current != null && !nodes.ContainsKey(current))
         {
             result.Add(current);
-            current = Path.GetDirectoryName(current);
+            current = GetParentFullName(current);
         }
 
         closestParent = current == null ? null : (DirectoryEntry)nodes[current];
@@ -228,5 +231,11 @@ public class FileSystemEntryTree
         }
 
         return updated.ToArray();
+    }
+
+    private string GetParentFullName(string path)
+    {
+        var parts = path.Split('\\').ToArray();
+        return string.Join('\\', parts.Take(parts.Length - 1));
     }
 }

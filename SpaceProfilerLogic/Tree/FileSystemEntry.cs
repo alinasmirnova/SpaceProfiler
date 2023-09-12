@@ -12,8 +12,8 @@ public class FileSystemEntry
 
     protected FileSystemEntry(string fullName, FileSystemEntry? parent = null)
     {
-        FullName = fullName;
-        Name = Path.GetFileName(fullName);
+        FullName = fullName.TrimEnd('\\');
+        Name = FullName.Split('\\').Last();
         Parent = parent;
     }
     

@@ -6,10 +6,13 @@ public class DirectoryWatcher
 {
     private FileSystemWatcher? watcher;
 
-    private readonly Queue<FileSystemEventArgs> changesQueue = new();
+    private readonly ConcurrentQueue<FileSystemEventArgs> changesQueue = new();
 
     public void Start(string root)
     {
+        if (!FileSystemAccessHelper.IsAccessible(root))
+            return;
+        
         watcher = new FileSystemWatcher();
         watcher.Path = Path.GetFullPath(root);
         watcher.NotifyFilter = NotifyFilters.Attributes
@@ -79,6 +82,9 @@ public class DirectoryWatcher
         {
             merger.Push(new Change(current, ChangeType.Create));
             if (File.Exists(current))
+                continue;
+            
+            if (!Directory.Exists(current) || !FileSystemAccessHelper.IsAccessible(current))
                 continue;
             
             foreach (var entry in Directory.EnumerateFileSystemEntries(current))

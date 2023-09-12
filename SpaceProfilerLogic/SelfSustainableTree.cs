@@ -89,6 +89,9 @@ public class SelfSustainableTree : IDisposable
         while (queue.TryDequeue(out var path) && active)
         {
             changesToApply.Enqueue(new Change(path, ChangeType.Create));
+            
+            if (!FileSystemAccessHelper.IsAccessible(path))
+                continue;
 
             foreach (var file in Directory.EnumerateFiles(path))
             {
