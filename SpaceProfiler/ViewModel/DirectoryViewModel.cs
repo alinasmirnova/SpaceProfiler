@@ -49,8 +49,8 @@ public class DirectoryViewModel : TreeViewItemViewModel
 
         if (Directory.Files.Length > 0)
         {
-            return Directory.Files.Length == 1 && Children.Last().Entry == Directory.Files[0] ||
-                   Children.Last() is FilesContainerViewModel;
+            return !(Directory.Files.Length == 1 && Children.Last().Entry == Directory.Files[0] ||
+                   Children.Last() is FilesContainerViewModel);
         }
 
         return false;
