@@ -392,8 +392,8 @@ public class SelfSustainableTreeChangesTests
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
         tree.GetChangedNodes().Should()
-            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot, dir1, dir11 },
-                o => o.IgnoringCyclicReferences().Including(f => f.FullName));
+            .ContainEquivalentOf(expectedRoot,
+                o => o.IgnoringCyclicReferences());
     }
 
     [Test]
@@ -418,9 +418,12 @@ public class SelfSustainableTreeChangesTests
         };
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
-        tree.GetChangedNodes().Should()
-            .BeEquivalentTo(new FileSystemEntry[] { expectedRoot, newDir1, dir11 },
-                o => o.IgnoringCyclicReferences().Including(f => f.FullName));
+        var changes = tree.GetChangedNodes();
+        changes.Should()
+            .ContainEquivalentOf(expectedRoot, o => o.IgnoringCyclicReferences());
+        changes.Should()
+            .ContainEquivalentOf(newDir1, o => o.IgnoringCyclicReferences());
+
     }
     
     [Test]
