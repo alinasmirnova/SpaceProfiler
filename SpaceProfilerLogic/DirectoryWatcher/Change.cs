@@ -56,4 +56,9 @@ public class Change
                 throw new ArgumentOutOfRangeException(nameof(eChangeType), eChangeType, null);
         }
     }
+
+    public override string ToString()
+    {
+        return $"{Type:G} {FullName}";
+    }
 }
