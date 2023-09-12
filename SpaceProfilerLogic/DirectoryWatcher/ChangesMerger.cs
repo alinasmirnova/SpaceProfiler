@@ -14,8 +14,8 @@ public class ChangesMerger
             return;
         }
 
-        var last = changes[change.FullName].Last();
-        if (last.Merge(change, out var merged))
+        var last = changes[change.FullName].LastOrDefault();
+        if (last != null && last.Merge(change, out var merged))
         {
             changes[change.FullName].RemoveAt(changes[change.FullName].Count - 1);
             if (merged != null) changes[change.FullName].Add(merged);
