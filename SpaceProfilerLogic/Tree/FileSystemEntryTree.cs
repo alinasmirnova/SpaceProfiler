@@ -51,7 +51,8 @@ public class FileSystemEntryTree
 
         var directory = CreateDirectory(fullPath, parent);
 
-        var result = createdParents.Cast<FileSystemEntry>().ToList();
+        var result = createdParents.Concat(createdParents.Select(p => p.Parent).Where(p => p != null))
+            .Cast<FileSystemEntry>().ToList();
         
         if (directory != null)
             result.Add(directory);
@@ -59,7 +60,7 @@ public class FileSystemEntryTree
         if (directory?.Parent != null)
             result.Add(directory.Parent);
 
-        return result.ToArray();
+        return result.Distinct().ToArray();
     }
 
     private DirectoryEntry? CreateDirectory(string fullPath, DirectoryEntry parent)
@@ -81,12 +82,22 @@ public class FileSystemEntryTree
             throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
         
         var file = new FileEntry(fullPath, FileSizeCalculator.GetFileSize(fullPath));
+        var result = createdParents.Concat(createdParents.Select(p => p.Parent).Where(p => p != null))
+            .Cast<FileSystemEntry>().Distinct().ToList();
+        
         if (!parent.AddFile(file))
-            return createdParents.Cast<FileSystemEntry>().ToArray(); 
+        {
+            return result.ToArray();
+        } 
         
         nodes.TryAdd(fullPath, file);
 
-        return GetCurrentAndParents(file).ToArray();
+        if (file.GetSize > 0)
+            return GetCurrentAndParents(file).ToArray();
+        
+        result.Add(parent);
+        result.Add(file);
+        return result.Distinct().ToArray();
     }
 
     private DirectoryEntry? FindOrCreateParent(string fullPath, out DirectoryEntry[] createdParents)
@@ -113,7 +124,7 @@ public class FileSystemEntryTree
         while (current != null && !nodes.ContainsKey(current))
         {
             result.Add(current);
-            current = Path.GetDirectoryName(fullName);
+            current = Path.GetDirectoryName(current);
         }
 
         closestParent = current == null ? null : (DirectoryEntry)nodes[current];
@@ -123,13 +134,15 @@ public class FileSystemEntryTree
     private DirectoryEntry[] CreateDirectories(string[] fullNames, DirectoryEntry parent)
     {
         var created = new List<DirectoryEntry>();
+        var lastCreated = parent;
         for (var index = fullNames.Length - 1; index >= 0; index--)
         {
             var fullName = fullNames[index];
-            var directory = CreateDirectory(fullName, parent);
+            var directory = CreateDirectory(fullName, lastCreated);
             if (directory == null)
                 break;
             
+            lastCreated = directory;
             created.Add(directory);
         }
 
