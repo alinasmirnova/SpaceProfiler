@@ -114,7 +114,7 @@ public class FileSystemEntryTree
         createdParents = CreateDirectories(missingParents, closestParent);
 
         var parentName = GetParentFullName(fullPath);
-        if (parentName == null || !nodes.ContainsKey(parentName))
+        if (!nodes.ContainsKey(parentName))
             throw new KeyNotFoundException($"Failed to find parent node for path {fullPath}");
         
         return (DirectoryEntry)nodes[parentName];
@@ -130,7 +130,7 @@ public class FileSystemEntryTree
             current = GetParentFullName(current);
         }
 
-        closestParent = current == null ? null : (DirectoryEntry)nodes[current];
+        closestParent = (DirectoryEntry)nodes[current];
         return result.ToArray();
     }
     
