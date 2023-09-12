@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using SpaceProfiler.Helpers;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
@@ -21,20 +22,20 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             Children.Add(UnloadedChild);
 
         Entry = entry;
-        Size = entry.GetSize;
+        Size = FileSizeHelper.ToHumanReadableString(entry.GetSize);
     }
 
     public FileSystemEntry? Entry { get; }
     
-    private long size;
-    public long Size
+    private string size;
+    public string Size
     {
         get => size;
         set
         {
             if (value != size)
             {
-                value = size;
+                size = value;
                 OnPropertyChanged();
             }
         }
@@ -84,7 +85,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         if (Entry == null)
             return;
         
-        Size = Entry.GetSize;
+        Size = FileSizeHelper.ToHumanReadableString(Entry.GetSize);
         if (HasChildren() && NotFullyLoaded)
             return;
 
@@ -101,6 +102,8 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         if (HasChildren())
             Children?.Add(UnloadedChild);
     }
+
+    
     
     #region INotifyPropertyChanged Members
     public event PropertyChangedEventHandler? PropertyChanged;
