@@ -12,7 +12,7 @@
            <Button Width="27" Height="27" Margin="0,0,5,0" Click="SelectDirectoryButton_Click"><Image Margin="1,0" Source="Icons\opened-folder.png" /></Button>
        </StackPanel>
         
-        <TreeView ItemsSource="{Binding Items}">
+        <TreeView ItemsSource="{Binding Items}" Grid.IsSharedSizeScope="True">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -24,16 +24,17 @@
                 <HierarchicalDataTemplate 
                     DataType="{x:Type viewModel:TreeViewItemViewModel}" 
                     ItemsSource="{Binding Children}"
-                    
                 >
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="{Binding Size}" />
-                        <TextBlock Text=" (" />
-                        <TextBlock Text="{Binding PercentFromRoot}" />
-                        <TextBlock Text=") " />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="A"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto" MinWidth="200" SharedSizeGroup="B"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="C"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="10 0" Text="{Binding Name}" />
+                        <TextBlock Grid.Column="1" Margin="10 0" Text="{Binding Size}" />
+                        <TextBlock Grid.Column="2" Margin="10 0" Text="{Binding PercentFromRoot}" />
+                    </Grid>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
