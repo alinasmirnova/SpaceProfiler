@@ -19,7 +19,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
             Children?.Add(new DirectoryViewModel(child, Root));
         }
 
-        if (Directory.Subdirectories.Any() && Directory.Files.Length > 1)
+        if (NeedFilesContainer())
         {
             Children?.Add(new FilesContainerViewModel(Directory, Root));
         }
@@ -38,23 +38,38 @@ public class DirectoryViewModel : TreeViewItemViewModel
             return false;
         
         var count = Directory.Subdirectories.Length;
-        count += Directory.Files.Length > 1 ? 1 : Directory.Files.Length;
+        if (NeedFilesContainer())
+            count++;
+        else
+        {
+            count += Directory.Files.Length;
+        }
+        
         if (count != Children.Count)
             return true;
 
-        if (Directory.Subdirectories.Where((t, i) => Children[i].Entry != t).Any())
+        for (var i = 0; i < Directory.Subdirectories.Length; i++)
         {
-            return true;
+            if (Directory.Subdirectories[i] != Children[i].Entry)
+                return true;
         }
 
-        if (Directory.Files.Length > 0)
-        {
-            return !(Directory.Files.Length == 1 && Children.Last().Entry == Directory.Files[0] ||
-                   Children.Last() is FilesContainerViewModel);
-        }
+        var current = Directory.Subdirectories.Length;
+        if (NeedFilesContainer())
+            return Children.Last() is not FilesContainerViewModel;
 
+        for (var i = 0; i < Directory.Files.Length; i++)
+        {
+            if (Directory.Files[i] != Children[current + i].Entry)
+                return true;
+        }
         return false;
     }
-    
+
+    private bool NeedFilesContainer()
+    {
+        return Directory.Subdirectories.Any() && Directory.Files.Length > 1;
+    }
+
     protected override bool HasChildren() => Directory.Subdirectories.Any() || Directory.Files.Any();
 }
