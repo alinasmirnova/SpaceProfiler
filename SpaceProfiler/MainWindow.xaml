@@ -22,38 +22,12 @@
 
             <TreeView.Resources>
                 <HierarchicalDataTemplate 
-                    DataType="{x:Type viewModel:DirectoryViewModel}" 
+                    DataType="{x:Type viewModel:TreeViewItemViewModel}" 
                     ItemsSource="{Binding Children}"
                     
                 >
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="{Binding Size}" />
-                        <TextBlock Text=" (" />
-                        <TextBlock Text="{Binding PercentFromRoot}" />
-                        <TextBlock Text=") " />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate 
-                    DataType="{x:Type viewModel:FileViewModel}" 
-                    ItemsSource="{Binding Children}"
-                >
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="  " />
-                        <TextBlock Text="{Binding Size}" />
-                        <TextBlock Text=" (" />
-                        <TextBlock Text="{Binding PercentFromRoot}" />
-                        <TextBlock Text=") " />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate 
-                    DataType="{x:Type viewModel:FilesContainerViewModel}" 
-                    ItemsSource="{Binding Children}"
-                >
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Text}" />
                         <TextBlock Text="  " />
                         <TextBlock Text="{Binding Size}" />
                         <TextBlock Text=" (" />

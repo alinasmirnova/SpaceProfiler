@@ -17,6 +17,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     {
         size = string.Empty;
         percentFromRoot = string.Empty;
+        name = string.Empty;
     }
 
     protected TreeViewItemViewModel(FileSystemEntry entry, FileSystemEntry? root, bool hasChildren)
@@ -28,6 +29,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         Entry = entry;
         Root = root;
         SizeValue = GetSize();
+        name = Entry.Name;
     }
 
     public FileSystemEntry? Entry { get; }
@@ -99,7 +101,6 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     }
 
     private string fontWeight = null!;
-
     public string FontWeight
     {
         get => fontWeight;
@@ -110,6 +111,18 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
                 fontWeight = value;
                 OnPropertyChanged();
             }
+        }
+    }
+
+    private string name;
+    public string Name
+    {
+        get => name;
+        set
+        {
+            if (value == name) return;
+            name = value;
+            OnPropertyChanged();
         }
     }
 
