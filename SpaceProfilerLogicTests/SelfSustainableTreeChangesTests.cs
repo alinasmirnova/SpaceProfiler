@@ -23,8 +23,6 @@ public class SelfSustainableTreeChangesTests
     {
         helper = new FileSystemHelper(rootFullName);
     }
-    
-    #region Create
 
     [Test]
     public void TryAddExternalFile()
@@ -215,8 +213,99 @@ public class SelfSustainableTreeChangesTests
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
         tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, parent, newFile}, o => o.IgnoringCyclicReferences());
     }
-    #endregion
     
+    [Test]
+    public void ChangeFileSizeInRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+        
+        DoWithDelay(tree, () => helper.ChangeFile("1f", 500));
+        
+        var newFile = new FileEntry($"{rootFullName}\\1f", 500);
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 500)
+        {
+            Files = expectedRoot.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray(),
+            Subdirectories = expectedRoot.Subdirectories
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newFile}, o => o.IgnoringCyclicReferences());
+    }
+    
+    [Test]
+    public void ClearFileInRoot()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+        
+        DoWithDelay(tree, () => helper.ChangeFile("1f", 0));
+        
+        var newFile = new FileEntry($"{rootFullName}\\1f", 0);
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        {
+            Files = expectedRoot.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray(),
+            Subdirectories = expectedRoot.Subdirectories
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newFile}, o => o.IgnoringCyclicReferences());
+    }
+    
+    [Test]
+    public void ChangeFileSizeInSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+        
+        DoWithDelay(tree, () => helper.ChangeFile("1\\11f", 500));
+        
+        var newFile = new FileEntry($"{rootFullName}\\1\\11f", 500);
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
+        var oldParent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize - 500)
+        {
+            Subdirectories = oldParent.Subdirectories,
+            Files = oldParent.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray()
+        };
+
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 500)
+        {
+            Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldParent).Concat(new[] { newParent })
+                .ToArray(),
+            Files = expectedRoot.Files
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newParent, newFile}, o => o.IgnoringCyclicReferences());
+    }
+    
+    [Test]
+    public void ClearFileInSubdirectory()
+    {
+        (tree, var expectedRoot) = CreateTree($"{rootFullName}");
+        
+        DoWithDelay(tree, () => helper.ChangeFile("1\\11f", 0));
+        
+        var newFile = new FileEntry($"{rootFullName}\\1\\11f", 0);
+        var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
+        var oldParent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
+        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize - 1000)
+        {
+            Subdirectories = oldParent.Subdirectories,
+            Files = oldParent.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray()
+        };
+
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        {
+            Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldParent).Concat(new[] { newParent })
+                .ToArray(),
+            Files = expectedRoot.Files
+        };
+        
+        tree.Root.Should().BeEquivalentTo(expectedRoot, options);
+        tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] {expectedRoot, newParent, newFile}, o => o.IgnoringCyclicReferences());
+    }
+
     /// <summary>
     /// Creates tree
     /// TestData

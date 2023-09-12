@@ -55,6 +55,11 @@ public class FileSystemHelper
         stream.Flush();
     }
 
+    public void ChangeFile(string path, long newSize)
+    {
+        File.WriteAllBytes(Path.GetFullPath(path, Root), new byte[newSize]);
+    }
+
     public void CreateDirectories(params string[] paths)
     {
         foreach (var path in paths)
