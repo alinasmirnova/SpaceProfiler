@@ -187,7 +187,8 @@ public class DirectoryWatcherTests
     public void ChangeAccessWritesForDirectory()
     {
         helper.CreateDirectory("1");
-        helper.CreateFile("1\\1f", 1000);
+        helper.CreateDirectory("1\\2");
+        helper.CreateFile("1\\2\\1f", 1000);
         
         watcher.Start(root);
         
@@ -198,7 +199,8 @@ public class DirectoryWatcherTests
         var expected = new List<Change>
         {
             new (GetFullPath("1"), ChangeType.Update),
-            new (GetFullPath("1\\1f"), ChangeType.Update),
+            new (GetFullPath("1\\2"), ChangeType.Update),
+            new (GetFullPath("1\\2\\1f"), ChangeType.Update),
         };
 
 

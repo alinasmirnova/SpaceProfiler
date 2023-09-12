@@ -155,7 +155,7 @@ public class FileSystemEntryTree
     private FileSystemEntry?[] Update(string fullPath)
     {
         if (Directory.Exists(fullPath))
-            return Array.Empty<FileSystemEntry>();
+            return Create(fullPath);
 
         if (File.Exists(fullPath))
             return ChangeFile(fullPath);
