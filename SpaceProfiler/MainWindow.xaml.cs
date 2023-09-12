@@ -44,7 +44,7 @@ namespace SpaceProfiler
                 tree = new SelfSustainableTree(dialog.SelectedPath);
                 if (tree?.Root != null)
                 {
-                    viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
+                    viewModel.Items = new[] { new DirectoryViewModel(tree.Root, tree.Root) };
                     if (!syncInProgress)
                     {
                         background.Start();

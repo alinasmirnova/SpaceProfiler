@@ -15,4 +15,12 @@ public static class FileSizeHelper
 
         return $"{current:N1} {Options[i]}";
     }
+
+    public static double GetPercent(long sizeValue, long? rootGetSize)
+    {
+        if (rootGetSize is null or 0)
+            return 0;
+        
+        return (double) sizeValue / rootGetSize.Value;
+    }
 }

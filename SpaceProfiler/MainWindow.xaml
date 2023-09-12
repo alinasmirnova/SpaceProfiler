@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SpaceProfiler"
         xmlns:viewModel="clr-namespace:SpaceProfiler.ViewModel"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Space Profiler" Height="450" Width="800">
     <DockPanel>
        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
            <Button Width="27" Height="27" Margin="0,0,5,0" Click="SelectDirectoryButton_Click"><Image Margin="1,0" Source="Icons\opened-folder.png" /></Button>
@@ -16,13 +16,7 @@
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                    <Setter Property="FontWeight" Value="Normal" />
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="FontWeight" Value="Bold" />
-                        </Trigger>
-                    </Style.Triggers>
+                    <Setter Property="FontWeight" Value="{Binding FontWeight, Mode=TwoWay}" />
                 </Style>
             </TreeView.ItemContainerStyle>
 
@@ -30,11 +24,15 @@
                 <HierarchicalDataTemplate 
                     DataType="{x:Type viewModel:DirectoryViewModel}" 
                     ItemsSource="{Binding Children}"
+                    
                 >
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="  " />
                         <TextBlock Text="{Binding Size}" />
+                        <TextBlock Text=" (" />
+                        <TextBlock Text="{Binding PercentFromRoot}" />
+                        <TextBlock Text=") " />
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate 
@@ -45,6 +43,9 @@
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="  " />
                         <TextBlock Text="{Binding Size}" />
+                        <TextBlock Text=" (" />
+                        <TextBlock Text="{Binding PercentFromRoot}" />
+                        <TextBlock Text=") " />
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate 
@@ -55,6 +56,9 @@
                         <TextBlock Text="{Binding Text}" />
                         <TextBlock Text="  " />
                         <TextBlock Text="{Binding Size}" />
+                        <TextBlock Text=" (" />
+                        <TextBlock Text="{Binding PercentFromRoot}" />
+                        <TextBlock Text=") " />
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>

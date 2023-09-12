@@ -6,7 +6,7 @@ namespace SpaceProfiler.ViewModel;
 public class DirectoryViewModel : TreeViewItemViewModel
 {
     private DirectoryEntry Directory => (DirectoryEntry) Entry!;
-    public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.Subdirectories.Any() || entry.Files.Any())
+    public DirectoryViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Subdirectories.Any() || entry.Files.Any())
     {
     }
 
@@ -16,18 +16,18 @@ public class DirectoryViewModel : TreeViewItemViewModel
     {
         foreach (var child in Directory.Subdirectories)
         {
-            Children?.Add(new DirectoryViewModel(child));
+            Children?.Add(new DirectoryViewModel(child, Root));
         }
 
         if (Directory.Subdirectories.Any() && Directory.Files.Length > 1)
         {
-            Children?.Add(new FilesContainerViewModel(Directory));
+            Children?.Add(new FilesContainerViewModel(Directory, Root));
         }
         else
         {
             foreach (var entryFile in Directory.Files)
             {
-                Children?.Add(new FileViewModel(entryFile));
+                Children?.Add(new FileViewModel(entryFile, Root));
             }
         }
     }

@@ -7,7 +7,7 @@ namespace SpaceProfiler.ViewModel;
 public class FilesContainerViewModel : TreeViewItemViewModel
 {
     private DirectoryEntry? Directory => (DirectoryEntry?)Entry;
-    public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.Files.Any())
+    public FilesContainerViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Files.Any())
     {
         text = string.Empty;
         Count = entry.Files.Length;
@@ -63,6 +63,14 @@ public class FilesContainerViewModel : TreeViewItemViewModel
         Count = Directory.Files.Length;
     }
 
+    protected override long GetSize()
+    {
+        if (Directory == null)
+            return 0;
+        
+        return Directory.Files.Sum(f => f.GetSize);
+    }
+
     protected override void LoadChildren()
     {
         if (Directory == null)
@@ -70,7 +78,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
         
         foreach (var fileEntry in Directory.Files)
         {
-            Children?.Add(new FileViewModel(fileEntry));
+            Children?.Add(new FileViewModel(fileEntry, Root));
         }
     }
 }

@@ -13,29 +13,64 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     public ObservableCollection<TreeViewItemViewModel>? Children { get; }
 
-    private TreeViewItemViewModel() { }
+    private TreeViewItemViewModel()
+    {
+        size = string.Empty;
+        percentFromRoot = string.Empty;
+    }
 
-    protected TreeViewItemViewModel(FileSystemEntry entry, bool hasChildren)
+    protected TreeViewItemViewModel(FileSystemEntry entry, FileSystemEntry? root, bool hasChildren)
     {
         Children = new ObservableCollection<TreeViewItemViewModel>();
         if (hasChildren)
             Children.Add(UnloadedChild);
 
         Entry = entry;
-        Size = FileSizeHelper.ToHumanReadableString(entry.GetSize);
+        Root = root;
+        SizeValue = GetSize();
     }
 
     public FileSystemEntry? Entry { get; }
+    public FileSystemEntry? Root { get; }
     
-    private string size;
+    private long? sizeValue;
+    public long? SizeValue
+    {
+        get => sizeValue ?? 0;
+        set
+        {
+            if (value == sizeValue || value == null) return;
+            sizeValue = value;
+            var percent = FileSizeHelper.GetPercent(value.Value, Root?.GetSize);
+            PercentFromRoot = $"{percent:P}";
+            Size = FileSizeHelper.ToHumanReadableString(value.Value);
+            FontWeight = percent > 0.1 ? "Bold" : "Normal";
+        }
+    }
+
+    private string size = null!;
     public string Size
     {
         get => size;
-        set
+        private set
         {
             if (value != size)
             {
                 size = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    
+    private string percentFromRoot = null!;
+    public string PercentFromRoot
+    {
+        get => percentFromRoot;
+        private set
+        {
+            if (value != percentFromRoot)
+            {
+                percentFromRoot = value;
                 OnPropertyChanged();
             }
         }
@@ -63,15 +98,16 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         }
     }
 
-    private bool isSelected;
-    public bool IsSelected
+    private string fontWeight = null!;
+
+    public string FontWeight
     {
-        get => isSelected;
+        get => fontWeight;
         set
         {
-            if (value != isSelected)
+            if (value != fontWeight)
             {
-                isSelected = value;
+                fontWeight = value;
                 OnPropertyChanged();
             }
         }
@@ -80,12 +116,13 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     protected virtual void LoadChildren() {}
     protected virtual bool HasChildrenChanged() => false;
     protected virtual bool HasChildren() => false;
+    protected virtual long GetSize() => Entry?.GetSize ?? 0;
     public virtual void Update()
     {
         if (Entry == null)
             return;
         
-        Size = FileSizeHelper.ToHumanReadableString(Entry.GetSize);
+        SizeValue = GetSize();
         if (HasChildren() && NotFullyLoaded)
             return;
 
@@ -102,8 +139,6 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         if (HasChildren())
             Children?.Add(UnloadedChild);
     }
-
-    
     
     #region INotifyPropertyChanged Members
     public event PropertyChangedEventHandler? PropertyChanged;
