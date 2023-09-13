@@ -3,7 +3,7 @@ using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfilerLogicTests;
 
-public class TestFileSystemEntryTree : FileSystemEntryTree
+internal class TestFileSystemEntryTree : FileSystemEntryTree
 {
     public TestFileSystemEntryTree(string fullRootName) : base(fullRootName)
     {
