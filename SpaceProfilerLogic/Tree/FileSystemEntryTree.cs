@@ -4,6 +4,8 @@ namespace SpaceProfilerLogic.Tree;
 
 public class FileSystemEntryTree
 {
+    private readonly ReaderWriterLock createDeleteLock = new ReaderWriterLock();
+    
     public DirectoryEntry? Root { get; set; }
 
     private readonly ConcurrentDictionary<string, FileSystemEntry> nodes = new();
@@ -23,24 +25,42 @@ public class FileSystemEntryTree
         if (Root == null || !path.StartsWith(Root.FullName))
             return Array.Empty<FileSystemEntry>();
         
-        if (Directory.Exists(path))
+        var timeout = TimeSpan.FromMinutes(1);
+        try
         {
-            if (nodes.ContainsKey(path))
-               return Update(path);
+            createDeleteLock.AcquireReaderLock(timeout);
 
-            return CreateDirectory(path);
+            if (Directory.Exists(path))
+            {
+                if (nodes.ContainsKey(path))
+                    return Update(path);
+
+                return CreateDirectory(path);
+            }
+
+            if (File.Exists(path))
+            {
+                if (nodes.ContainsKey(path))
+                    return Update(path);
+
+                return CreateFile(path);
+            }
+        }
+        finally
+        {
+            createDeleteLock.ReleaseReaderLock();
         }
 
-        if (File.Exists(path))
+        try
         {
+            createDeleteLock.AcquireWriterLock(timeout);
             if (nodes.ContainsKey(path))
-                return Update(path);
-
-            return CreateFile(path);
+                return Delete(path);
         }
-
-        if (nodes.ContainsKey(path))
-            return Delete(path);
+        finally
+        {
+            createDeleteLock.ReleaseWriterLock();
+        }
 
         return Array.Empty<FileSystemEntry>();
     }
@@ -115,7 +135,6 @@ public class FileSystemEntryTree
             }
             return result;
         }
-
         return null;
     }
 
@@ -219,40 +238,35 @@ public class FileSystemEntryTree
         return Array.Empty<FileSystemEntry>();
     }
 
-    private readonly object lockForDelete = new();
-
     private FileSystemEntry?[] Delete(string fullPath)
     {
-        lock (lockForDelete)
+        if (!nodes.ContainsKey(fullPath))
+            return Array.Empty<FileSystemEntry>();
+
+        var entry = nodes[fullPath];
+        if (entry == Root)
         {
-            if (!nodes.ContainsKey(fullPath))
-                return Array.Empty<FileSystemEntry>();
-
-            var entry = nodes[fullPath];
-            if (entry == Root)
-            {
-                Root = null;
-                nodes.Clear();
-                return Array.Empty<FileSystemEntry>();
-            }
-
-            var parent = (DirectoryEntry)entry.Parent!;
-            if (entry is DirectoryEntry && !parent.RemoveSubdirectory(entry))
-                return Array.Empty<FileSystemEntry>();
-
-            if (entry is FileEntry && !parent.RemoveFile(entry))
-                return Array.Empty<FileSystemEntry>();
-
-            RemoveFromNodesWithSubElements(fullPath);
-
-            var result = new List<FileSystemEntry>() { parent };
-            if (entry.GetSize > 0)
-            {
-                result = result.Concat(GetParents(parent)).ToList();
-            }
-            
-            return result.ToArray();
+            Root = null;
+            nodes.Clear();
+            return Array.Empty<FileSystemEntry>();
         }
+
+        var parent = (DirectoryEntry)entry.Parent!;
+        if (entry is DirectoryEntry && !parent.RemoveSubdirectory(entry))
+            return Array.Empty<FileSystemEntry>();
+
+        if (entry is FileEntry && !parent.RemoveFile(entry))
+            return Array.Empty<FileSystemEntry>();
+
+        RemoveFromNodesWithSubElements(fullPath);
+
+        var result = new List<FileSystemEntry>() { parent };
+        if (entry.GetSize > 0)
+        {
+            result = result.Concat(GetParents(parent)).ToList();
+        }
+
+        return result.ToArray();
     }
 
     private void RemoveFromNodesWithSubElements(string fullName)
