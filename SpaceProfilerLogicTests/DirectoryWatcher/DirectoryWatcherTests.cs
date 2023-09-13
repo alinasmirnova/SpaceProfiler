@@ -68,11 +68,8 @@ public class DirectoryWatcherTests
         "destination",
             "toMove",
             "destination\\toMove",
-            "destination\\toMove\\1f",
             "destination\\toMove\\1",
-            "destination\\toMove\\2",
-            "destination\\toMove\\2\\1f",
-            "destination\\toMove\\2\\2f"
+            "destination\\toMove\\2"
         );
 
         actual.Should().BeEquivalentTo(expected);
@@ -99,10 +96,7 @@ public class DirectoryWatcherTests
         var expected = BuildExpected(
             "destination\\toMove",
             "destination\\toMove\\1",
-            "destination\\toMove\\2",
-            "destination\\toMove\\2\\1f",
-            "destination\\toMove\\2\\2f",
-            "destination\\toMove\\1f"
+            "destination\\toMove\\2"
         );
 
         actual.Should().BeEquivalentTo(expected);

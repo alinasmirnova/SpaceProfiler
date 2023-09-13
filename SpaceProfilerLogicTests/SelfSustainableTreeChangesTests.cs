@@ -198,7 +198,7 @@ public class SelfSustainableTreeChangesTests
         
         var newFile = new FileEntry($"{rootFullName}\\2\\21f", 0);
         var parent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\2")!;
-        parent.Files = new[] { newFile };
+        parent.Files = parent.Files.Concat(new[] { newFile }).ToArray();
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
         tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[] { parent, newFile }, o => o.IgnoringCyclicReferences());

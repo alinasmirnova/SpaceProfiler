@@ -69,8 +69,6 @@ public class SelfSustainableTreeLoadFromDiskTests
         var tree = new SelfSustainableTree(root);
         WaitUntilLoaded(tree, TimeSpan.FromMinutes(1));
 
-        var file1 = new FileEntry($"{root}\\1f", 1000);
-        var file2 = new FileEntry($"{root}\\2f", 1000);
         var file11 = new FileEntry($@"{root}\1\11f", 1000);
         var file12 = new FileEntry($@"{root}\1\12f", 1000);
         var file111 = new FileEntry($@"{root}\1\11\111f", 1000);
@@ -89,13 +87,13 @@ public class SelfSustainableTreeLoadFromDiskTests
         
         var expectedRoot = new DirectoryEntry(root, 6000)
         {
-            Files = new[] { file1, file2 },
+            Files = new[] { new FileEntry($"{root}\\1f", 1000), new FileEntry($"{root}\\2f", 1000) },
             Subdirectories = new[] { dir1, dir2 }
         };
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
         tree.GetChangedNodes().Should().BeEquivalentTo(new FileSystemEntry[]
-            { expectedRoot, dir1, dir2, dir11, file1, file2, file11, file12, file111, file112 });
+            { expectedRoot, dir1, dir2, dir11, file11, file12, file111, file112 });
     }
 
     private void WaitUntilLoaded(SelfSustainableTree tree, TimeSpan timeout)

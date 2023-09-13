@@ -23,22 +23,28 @@ public class FileSystemEntryTreeTests
         var tree = new FileSystemEntryTree(rootFullName);
         var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\111f");
 
-        var file = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
-        var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 1000)
+        var file111 = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
+        var file112 = new FileEntry($"{rootFullName}\\1\\11\\112f", 1000);
+        var dir11 = new DirectoryEntry($"{rootFullName}\\1\\11", 2000)
         {
-            Files = new[] { file }
+            Files = new[] { file111, file112 }
         };
-        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 1000)
+        
+        var file11 = new FileEntry($"{rootFullName}\\1\\11f", 1000);
+        var file12 = new FileEntry($"{rootFullName}\\1\\12f", 1000);
+        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 4000)
         {
-            Subdirectories = new[] { dir2 }
+            Subdirectories = new[] { dir11 },
+            Files = new[] { file11, file12 }
         };
-        var expectedRoot = new DirectoryEntry(rootFullName, 1000)
+        var expectedRoot = new DirectoryEntry(rootFullName, 6000)
         {
-            Subdirectories = new[] { dir1 }
+            Subdirectories = new[] { dir1 },
+            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
         };
 
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
-        changed.Should().BeEquivalentTo(new FileSystemEntry[] { expectedRoot, dir1, dir2, file },
+        changed.Should().BeEquivalentTo(new FileSystemEntry[] { file111, file112, dir11, dir1, file11, file12, expectedRoot },
             o => o.IgnoringCyclicReferences());
     }
     
@@ -49,25 +55,33 @@ public class FileSystemEntryTreeTests
         
         var tree = new FileSystemEntryTree(rootFullName);
         tree.SynchronizeWithFileSystem($"{rootFullName}\\1");
+        fileSystemHelper.CreateFile("1\\11\\113f", 0);
         
-        var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\112f");
+        var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\113f");
 
-        var file = new FileEntry($"{rootFullName}\\1\\11\\112f", 0);
-        var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 0)
+        var file111 = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
+        var file112 = new FileEntry($"{rootFullName}\\1\\11\\112f", 1000);
+        var file113 = new FileEntry($"{rootFullName}\\1\\11\\113f", 0);
+        var dir11 = new DirectoryEntry($"{rootFullName}\\1\\11", 2000)
         {
-            Files = new[] { file }
+            Files = new[] { file111, file112, file113 }
         };
-        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 0)
+        
+        var file11 = new FileEntry($"{rootFullName}\\1\\11f", 1000);
+        var file12 = new FileEntry($"{rootFullName}\\1\\12f", 1000);
+        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 4000)
         {
-            Subdirectories = new[] { dir2 }
+            Subdirectories = new[] { dir11 },
+            Files = new[] { file11, file12 }
         };
-        var expectedRoot = new DirectoryEntry(rootFullName, 0)
+        var expectedRoot = new DirectoryEntry(rootFullName, 6000)
         {
-            Subdirectories = new[] { dir1 }
+            Subdirectories = new[] { dir1 },
+            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
         };
 
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
-        changed.Should().BeEquivalentTo(new FileSystemEntry[] { dir1, dir2, file },
+        changed.Should().BeEquivalentTo(new FileSystemEntry[] { file113, file111, file112, dir11, dir1, expectedRoot },
             o => o.IgnoringCyclicReferences());
     }
     
@@ -79,18 +93,27 @@ public class FileSystemEntryTreeTests
         var tree = new FileSystemEntryTree(rootFullName);
         var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11");
 
-        var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 0);
-        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 0)
+        var file111 = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
+        var file112 = new FileEntry($"{rootFullName}\\1\\11\\112f", 1000);
+        var dir11 = new DirectoryEntry($"{rootFullName}\\1\\11", 2000)
         {
-            Subdirectories = new[] { dir2 }
+            Files = new[] { file111, file112 }
         };
-        var expectedRoot = new DirectoryEntry(rootFullName, 0)
+        
+        var file11 = new FileEntry($"{rootFullName}\\1\\11f", 1000);
+        var file12 = new FileEntry($"{rootFullName}\\1\\12f", 1000);
+        var dir1 = new DirectoryEntry($"{rootFullName}\\1", 4000)
         {
-            Subdirectories = new[] { dir1 }
+            Subdirectories = new[] { dir11 },
+            Files = new[] { file11, file12 }
         };
-
+        var expectedRoot = new DirectoryEntry(rootFullName, 6000)
+        {
+            Subdirectories = new[] { dir1 },
+            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
+        };
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
-        changed.Should().BeEquivalentTo(new FileSystemEntry[] { expectedRoot, dir1, dir2 },
+        changed.Should().BeEquivalentTo(new FileSystemEntry[] { file111, file112, dir11, dir1, file11, file12, expectedRoot },
             o => o.IgnoringCyclicReferences());
     }
     
@@ -113,7 +136,6 @@ public class FileSystemEntryTreeTests
         fileSystemHelper.CreateFiles(1000 , "1f", "2f");
         fileSystemHelper.CreateDirectoryWithFiles("1", 1000, "11f", "12f");
         fileSystemHelper.CreateDirectoryWithFiles("1\\11", 1000, "111f", "112f");
-        fileSystemHelper.CreateFile("1\\11\\112f", 0);
         fileSystemHelper.CreateDirectory(@"2");
     }
     

@@ -73,15 +73,20 @@ public class DirectoryWatcher
 
     private void PushWithSubdirectoriesRecursively(HashSet<string> result, string path)
     {
+        result.Add(path);
+        
         var queue = new Queue<string>();
         queue.Enqueue(path);
         while (queue.TryDequeue(out var current))
         {
-            result.Add(current);
-            
-            if (!Directory.Exists(current) || !FileSystemAccessHelper.IsAccessible(current))
+            if (!Directory.Exists(current))
                 continue;
             
+            result.Add(current);
+            
+            if (!FileSystemAccessHelper.IsAccessible(current))
+                continue;
+
             foreach (var entry in Directory.EnumerateFileSystemEntries(current))
             {
                 queue.Enqueue(entry);

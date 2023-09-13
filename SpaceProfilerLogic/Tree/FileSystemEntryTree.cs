@@ -14,8 +14,7 @@ public class FileSystemEntryTree
             throw new ArgumentException(nameof(fullRootName));
         fullRootName = fullRootName.TrimEnd('\\');
         
-        Root = new DirectoryEntry(fullRootName);
-        nodes.TryAdd(Root.FullName, Root);
+        Root = CreateDirectory(fullRootName, null);
     }
 
     public FileSystemEntry?[] SynchronizeWithFileSystem(string path)
@@ -54,25 +53,67 @@ public class FileSystemEntryTree
 
         var directory = CreateDirectory(fullPath, parent);
 
-        var result = createdParents.Concat(createdParents.Select(p => p.Parent).Where(p => p != null))
+        var result = createdParents.Concat(createdParents.Select(p => p.Parent)
+                .Concat(createdParents.SelectMany(p => p.Files)).Where(p => p != null))
             .Cast<FileSystemEntry>().ToList();
-        
+
         if (directory != null)
+        {
             result.Add(directory);
-        
+            foreach (var fileEntry in directory.Files)
+            {
+                result.Add(fileEntry);
+            }
+        }
+
         if (directory?.Parent != null)
+        {
             result.Add(directory.Parent);
+            if (directory.GetSize > 0 || createdParents.Any())
+            {
+                result = result.Concat(GetParents(directory.Parent)).ToList();
+            }
+        }
 
         return result.Distinct().ToArray();
     }
 
-    private DirectoryEntry? CreateDirectory(string fullPath, DirectoryEntry parent)
+    private DirectoryEntry? CreateDirectory(string fullPath, DirectoryEntry? parent)
     {
-        var directory = new DirectoryEntry(fullPath, parent);
-        if (parent.AddEmptySubdirectory(directory))
+        DirectoryEntry result;
+
+        var files = new List<FileEntry>();
+        if (FileSystemAccessHelper.IsAccessible(fullPath))
         {
-            nodes.TryAdd(directory.FullName, directory);
-            return directory;
+            long sum = 0;
+            foreach (var file in Directory.EnumerateFiles(fullPath))
+            {
+                if (!File.Exists(file))
+                    continue;
+                
+                var fileSize = FileSizeCalculator.GetFileSize(file);
+                files.Add(new FileEntry(file, fileSize));
+                sum += fileSize;
+            }
+
+            result = new DirectoryEntry(fullPath, sum, parent)
+            {
+                Files = files.ToArray()
+            };
+        }
+        else
+        {
+            result = new DirectoryEntry(fullPath, parent);
+        }
+        
+        if (parent == null || parent.AddSubdirectory(result))
+        {
+            nodes.TryAdd(result.FullName, result);
+            foreach (var file in result.Files)
+            {
+                nodes.TryAdd(file.FullName, file);
+            }
+            return result;
         }
 
         return null;
@@ -83,21 +124,18 @@ public class FileSystemEntryTree
         var parent = FindOrCreateParent(fullPath, out var createdParents);
         if (parent == null)
             throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
-        
+
+        if (createdParents.Any())
+            return createdParents.Concat(GetParents(parent))
+                .Concat(createdParents.SelectMany(p => p.Files)).Distinct().ToArray();
+       
         var file = new FileEntry(fullPath, FileSizeCalculator.GetFileSize(fullPath));
-        var result = createdParents.Concat(createdParents.Select(p => p.Parent).Where(p => p != null))
-            .Cast<FileSystemEntry>().Distinct().ToList();
-        
         if (!parent.AddFile(file))
-        {
-            return result.ToArray();
-        } 
-        
+            return Array.Empty<FileSystemEntry>();
+
         nodes.TryAdd(file.FullName, file);
 
-        if (file.GetSize > 0)
-            return GetCurrentAndParents(file).ToArray();
-        
+        var result = file.GetSize > 0 ? GetParents(file) : new List<FileSystemEntry>();
         result.Add(parent);
         result.Add(file);
         return result.Distinct().ToArray();
@@ -172,7 +210,11 @@ public class FileSystemEntryTree
         var size = FileSizeCalculator.GetFileSize(fullPath);
         var diff = size - file.GetSize;
         if (file.AddSize(diff))
-            return GetCurrentAndParents(file);
+        {
+            var result = GetParents(file);
+            result.Add(file);
+            return result.ToArray();
+        }
 
         return Array.Empty<FileSystemEntry>();
     }
@@ -189,10 +231,9 @@ public class FileSystemEntryTree
             var entry = nodes[fullPath];
             if (entry == Root)
             {
-                var result = Root;
                 Root = null;
                 nodes.Clear();
-                return new FileSystemEntry[] { result };
+                return Array.Empty<FileSystemEntry>();
             }
 
             var parent = (DirectoryEntry)entry.Parent!;
@@ -203,11 +244,14 @@ public class FileSystemEntryTree
                 return Array.Empty<FileSystemEntry>();
 
             RemoveFromNodesWithSubElements(fullPath);
-            
+
+            var result = new List<FileSystemEntry>() { parent };
             if (entry.GetSize > 0)
-                return GetCurrentAndParents(parent);
+            {
+                result = result.Concat(GetParents(parent)).ToList();
+            }
             
-            return new FileSystemEntry?[] { parent };
+            return result.ToArray();
         }
     }
 
@@ -220,17 +264,17 @@ public class FileSystemEntryTree
         }
     }
 
-    private static FileSystemEntry[] GetCurrentAndParents(FileSystemEntry entry)
+    private static List<FileSystemEntry> GetParents(FileSystemEntry entry)
     {
-        var updated = new List<FileSystemEntry> { entry };
-        var current = entry?.Parent;
+        var updated = new List<FileSystemEntry>();
+        var current = entry.Parent;
         while (current != null)
         {
             updated.Add(current);
             current = current.Parent;
         }
 
-        return updated.ToArray();
+        return updated;
     }
 
     private string GetParentFullName(string path)

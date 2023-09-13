@@ -92,11 +92,6 @@ public class SelfSustainableTree : IDisposable
             if (!FileSystemAccessHelper.IsAccessible(path))
                 continue;
 
-            foreach (var file in Directory.EnumerateFiles(path))
-            {
-                pathsToRenew.Enqueue(file);
-            }
-
             foreach (var directory in Directory.EnumerateDirectories(path))
             {
                 queue.Enqueue(directory);

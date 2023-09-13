@@ -59,10 +59,15 @@ public class DirectoryEntry : FileSystemEntry
         }
     }
 
-    public bool AddEmptySubdirectory(DirectoryEntry directoryEntry)
+    public bool AddSubdirectory(DirectoryEntry directoryEntry)
     {
         directoryEntry.Parent = this;
-        return subdirectories.TryAdd(directoryEntry.Name, directoryEntry);
+        if (subdirectories.TryAdd(directoryEntry.Name, directoryEntry))
+        {
+            AddSize(directoryEntry.GetSize);
+            return true;
+        }
+        return false;
     }
     
     public bool RemoveSubdirectory(FileSystemEntry directoryEntry)
@@ -79,6 +84,11 @@ public class DirectoryEntry : FileSystemEntry
 
     public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
     {
+    }
+    
+    public DirectoryEntry(string fullName, long size, FileSystemEntry? parent = null) : base(fullName, parent)
+    {
+        Size = size;
     }
     
     public DirectoryEntry(string fullName, long size) : base(fullName)
