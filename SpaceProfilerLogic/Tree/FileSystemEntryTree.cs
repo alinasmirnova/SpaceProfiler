@@ -8,7 +8,7 @@ public class FileSystemEntryTree
     
     public DirectoryEntry? Root { get; set; }
 
-    private readonly ConcurrentDictionary<string, FileSystemEntry> nodes = new();
+    protected readonly ConcurrentDictionary<string, FileSystemEntry> nodes = new();
 
     public FileSystemEntryTree(string fullRootName)
     {

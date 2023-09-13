@@ -20,7 +20,7 @@ public class FileSystemEntryTreeTests
     {
         CreateTreeOnDisk(rootFullName);
         
-        var tree = new FileSystemEntryTree(rootFullName);
+        var tree = new TestFileSystemEntryTree(rootFullName);
         var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\111f");
 
         var file111 = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
@@ -37,23 +37,26 @@ public class FileSystemEntryTreeTests
             Subdirectories = new[] { dir11 },
             Files = new[] { file11, file12 }
         };
+        var file1 = new FileEntry($"{rootFullName}\\1f", 1000);
+        var file2 = new FileEntry($"{rootFullName}\\2f", 1000);
         var expectedRoot = new DirectoryEntry(rootFullName, 6000)
         {
             Subdirectories = new[] { dir1 },
-            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
+            Files = new[] { file1, file2 }
         };
 
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
         changed.Should().BeEquivalentTo(new FileSystemEntry[] { file111, file112, dir11, dir1, file11, file12, expectedRoot },
             o => o.IgnoringCyclicReferences());
+        tree.GetNodes.Should().BeEquivalentTo(CreateExpectedNodes(expectedRoot, file1, file2, dir1, file11, file12, dir11, file111, file112), o => o.IgnoringCyclicReferences());
     }
-    
+
     [Test]
     public void AddEmptyFileRecursively()
     {
         CreateTreeOnDisk(rootFullName);
         
-        var tree = new FileSystemEntryTree(rootFullName);
+        var tree = new TestFileSystemEntryTree(rootFullName);
         tree.SynchronizeWithFileSystem($"{rootFullName}\\1");
         fileSystemHelper.CreateFile("1\\11\\113f", 0);
         
@@ -74,23 +77,26 @@ public class FileSystemEntryTreeTests
             Subdirectories = new[] { dir11 },
             Files = new[] { file11, file12 }
         };
+        var file1 = new FileEntry($"{rootFullName}\\1f", 1000);
+        var file2 = new FileEntry($"{rootFullName}\\2f", 1000);
         var expectedRoot = new DirectoryEntry(rootFullName, 6000)
         {
             Subdirectories = new[] { dir1 },
-            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
+            Files = new[] { file1, file2 }
         };
 
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
         changed.Should().BeEquivalentTo(new FileSystemEntry[] { file113, file111, file112, dir11, dir1, expectedRoot },
             o => o.IgnoringCyclicReferences());
+        tree.GetNodes.Should().BeEquivalentTo(CreateExpectedNodes(expectedRoot, file1, file2, dir1, file11, file12, dir11, file111, file112, file113), o => o.IgnoringCyclicReferences());
     }
-    
+
     [Test]
     public void AddDirectoryRecursively()
     {
         CreateTreeOnDisk(rootFullName);
         
-        var tree = new FileSystemEntryTree(rootFullName);
+        var tree = new TestFileSystemEntryTree(rootFullName);
         var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11");
 
         var file111 = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
@@ -107,16 +113,19 @@ public class FileSystemEntryTreeTests
             Subdirectories = new[] { dir11 },
             Files = new[] { file11, file12 }
         };
+        var file1 = new FileEntry($"{rootFullName}\\1f", 1000);
+        var file2 = new FileEntry($"{rootFullName}\\2f", 1000);
         var expectedRoot = new DirectoryEntry(rootFullName, 6000)
         {
             Subdirectories = new[] { dir1 },
-            Files = new[] { new FileEntry($"{rootFullName}\\1f", 1000), new FileEntry($"{rootFullName}\\2f", 1000) }
+            Files = new[] { file1, file2 }
         };
         tree.Root.Should().BeEquivalentTo(expectedRoot, o => o.IgnoringCyclicReferences());
         changed.Should().BeEquivalentTo(new FileSystemEntry[] { file111, file112, dir11, dir1, file11, file12, expectedRoot },
             o => o.IgnoringCyclicReferences());
+        tree.GetNodes.Should().BeEquivalentTo(CreateExpectedNodes(expectedRoot, file1, file2, dir1, file11, file12, dir11, file111, file112), o => o.IgnoringCyclicReferences());
     }
-    
+
     /// <summary>
     /// Creates tree
     /// TestData
@@ -138,7 +147,15 @@ public class FileSystemEntryTreeTests
         fileSystemHelper.CreateDirectoryWithFiles("1\\11", 1000, "111f", "112f");
         fileSystemHelper.CreateDirectory(@"2");
     }
-    
+
+    private IEnumerable<KeyValuePair<string, FileSystemEntry>> CreateExpectedNodes(params FileSystemEntry[] entries)
+    {
+        foreach (var entry in entries)
+        {
+            yield return new KeyValuePair<string, FileSystemEntry>(entry.FullName, entry);
+        }
+    }
+
     [TearDown]
     public void TearDown()
     {
