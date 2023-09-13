@@ -10,8 +10,6 @@
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=dcb57f32_002Dce02_002D4888_002Db061_002Da2b0f297eb53/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="DeleteNotEmptyDirectoryFromRoot" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::924D31A0-B1DA-4B96-9F74-6E257D97F13B::net7.0::SpaceProfilerLogicTests.FileSystemEntryTreeTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="C:\GitHub\SpaceProfiler\SpaceProfilerLogicTests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;SpaceProfilerLogicTests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	</wpf:ResourceDictionary>

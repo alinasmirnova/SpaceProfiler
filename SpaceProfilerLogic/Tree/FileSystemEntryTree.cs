@@ -68,9 +68,6 @@ public class FileSystemEntryTree
     private FileSystemEntry[] CreateDirectory(string fullPath)
     {
         var parent = FindOrCreateParent(fullPath, out var createdParents);
-        if (parent == null)
-            throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
-
         var directory = CreateDirectory(fullPath, parent);
 
         var result = createdParents.Concat(createdParents.Select(p => p.Parent)
@@ -141,9 +138,6 @@ public class FileSystemEntryTree
     private FileSystemEntry[] CreateFile(string fullPath)
     {
         var parent = FindOrCreateParent(fullPath, out var createdParents);
-        if (parent == null)
-            throw new KeyNotFoundException($"Failed to find parent for {fullPath}");
-
         if (createdParents.Any())
             return createdParents.Concat(GetParents(parent))
                 .Concat(createdParents.SelectMany(p => p.Files)).Distinct().ToArray();
@@ -160,28 +154,25 @@ public class FileSystemEntryTree
         return result.Distinct().ToArray();
     }
 
-    private DirectoryEntry? FindOrCreateParent(string fullPath, out DirectoryEntry[] createdParents)
+    private DirectoryEntry FindOrCreateParent(string fullPath, out DirectoryEntry[] createdParents)
     {
         createdParents = Array.Empty<DirectoryEntry>();
         
         var missingParents = GetMissingParents(fullPath, out var closestParent);
-        if (closestParent == null)
-            return null;
-        
         createdParents = CreateDirectories(missingParents, closestParent);
 
         var parentName = GetParentFullName(fullPath);
-        if (!nodes.ContainsKey(parentName))
+        if (!nodes.ContainsKey(parentName) && Directory.Exists(parentName))
             throw new KeyNotFoundException($"Failed to find parent node for path {fullPath}");
         
         return (DirectoryEntry)nodes[parentName];
     }
     
-    private string[] GetMissingParents(string fullName, out DirectoryEntry? closestParent)
+    private string[] GetMissingParents(string fullName, out DirectoryEntry closestParent)
     {
         var result = new List<string>();
         var current = GetParentFullName(fullName);
-        while (current != string.Empty && !nodes.ContainsKey(current))
+        while (current != Root!.FullName && !nodes.ContainsKey(current))
         {
             result.Add(current);
             current = GetParentFullName(current);
@@ -200,7 +191,7 @@ public class FileSystemEntryTree
             var fullName = fullNames[index];
             var directory = CreateDirectory(fullName, lastCreated);
             if (directory == null)
-                break;
+                continue;
             
             lastCreated = directory;
             created.Add(directory);
