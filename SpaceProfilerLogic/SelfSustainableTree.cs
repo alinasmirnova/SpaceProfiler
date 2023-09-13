@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using SpaceProfilerLogic.DirectoryWatcher;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfilerLogic;
@@ -8,7 +7,7 @@ public class SelfSustainableTree : IDisposable
 {
     private readonly string rootFullPath;
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
-    private readonly ConcurrentQueue<Change> changesToApply = new();
+    private readonly ConcurrentQueue<string> pathsToRenew = new();
     
     private bool active;
 
@@ -58,7 +57,7 @@ public class SelfSustainableTree : IDisposable
         {
             foreach (var change in directoryWatcher.FlushChanges())
             {
-                changesToApply.Enqueue(change);
+                pathsToRenew.Enqueue(change);
             }
             Thread.Sleep(100);
         }
@@ -68,9 +67,9 @@ public class SelfSustainableTree : IDisposable
     {
         while (active)
         {
-            while (changesToApply.TryDequeue(out var change))
+            while (pathsToRenew.TryDequeue(out var path))
             {
-                var changed = Tree.Apply(change).Where(e => e != null).Cast<FileSystemEntry>();
+                var changed = Tree.SynchronizeWithFileSystem(path).Where(e => e != null).Cast<FileSystemEntry>();
                 foreach (var entry in changed)
                 {
                     changedNodes.AddOrUpdate(entry, 0, (_, _) => 0);
@@ -88,14 +87,14 @@ public class SelfSustainableTree : IDisposable
         queue.Enqueue(rootFullPath);
         while (queue.TryDequeue(out var path) && active)
         {
-            changesToApply.Enqueue(new Change(path, ChangeType.Create));
+            pathsToRenew.Enqueue(path);
             
             if (!FileSystemAccessHelper.IsAccessible(path))
                 continue;
 
             foreach (var file in Directory.EnumerateFiles(path))
             {
-                changesToApply.Enqueue(new Change(file, ChangeType.Create));
+                pathsToRenew.Enqueue(file);
             }
 
             foreach (var directory in Directory.EnumerateDirectories(path))

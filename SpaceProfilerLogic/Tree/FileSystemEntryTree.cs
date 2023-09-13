@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.IO;
-using SpaceProfilerLogic.DirectoryWatcher;
 
 namespace SpaceProfilerLogic.Tree;
 
@@ -20,28 +18,30 @@ public class FileSystemEntryTree
         nodes.TryAdd(Root.FullName, Root);
     }
 
-    public FileSystemEntry?[] Apply(Change change)
+    public FileSystemEntry?[] SynchronizeWithFileSystem(string path)
     {
-        var fullPath = change.FullName.TrimEnd('\\');
-        return change.Type switch
-        {
-            ChangeType.Create => Create(fullPath),
-            ChangeType.Update => Update(fullPath),
-            ChangeType.Delete => Delete(fullPath),
-            _ => throw new ArgumentOutOfRangeException(nameof(change.Type))
-        };
-    }
-
-    private FileSystemEntry?[] Create(string fullPath)
-    {
-        if (nodes.ContainsKey(fullPath) || !fullPath.StartsWith(Root.FullName))
+        path = path.TrimEnd('\\');
+        if (Root == null || !path.StartsWith(Root.FullName))
             return Array.Empty<FileSystemEntry>();
+        
+        if (Directory.Exists(path))
+        {
+            if (nodes.ContainsKey(path))
+               return Update(path);
 
-        if (Directory.Exists(fullPath))
-            return CreateDirectory(fullPath);
+            return CreateDirectory(path);
+        }
 
-        if (File.Exists(fullPath))
-            return CreateFile(fullPath);
+        if (File.Exists(path))
+        {
+            if (nodes.ContainsKey(path))
+                return Update(path);
+
+            return CreateFile(path);
+        }
+
+        if (nodes.ContainsKey(path))
+            return Delete(path);
 
         return Array.Empty<FileSystemEntry>();
     }
@@ -155,7 +155,7 @@ public class FileSystemEntryTree
     private FileSystemEntry?[] Update(string fullPath)
     {
         if (Directory.Exists(fullPath))
-            return Create(fullPath);
+            return Array.Empty<FileSystemEntry>();
 
         if (File.Exists(fullPath))
             return ChangeFile(fullPath);

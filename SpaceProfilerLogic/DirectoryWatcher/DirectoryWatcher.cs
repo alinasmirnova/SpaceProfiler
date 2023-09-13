@@ -47,11 +47,11 @@ public class DirectoryWatcher
         watcher.Renamed -= OnRenamed;
     }
 
-    public List<Change> FlushChanges()
+    public HashSet<string> FlushChanges()
     {
         var count = changesQueue.Count;
-        var merger = new ChangesMerger();
-        
+        var result = new HashSet<string>();
+
         for (var i = 0; i < count; i++)
         {
             if (!changesQueue.TryDequeue(out var change)) continue;
@@ -59,30 +59,25 @@ public class DirectoryWatcher
             var oldPath = (change as RenamedEventArgs)?.OldFullPath;
             if (oldPath != null)
             {
-                merger.Push(new Change(oldPath, ChangeType.Delete));
-                merger.Push(new Change(change.FullPath, ChangeType.Create));
+                result.Add(oldPath);
             }
-            else if (change.ChangeType == WatcherChangeTypes.Created)
-            {
-                PushCreateRecursively(merger, change);
-            }
+            
+            if (change.ChangeType == WatcherChangeTypes.Created)
+                PushWithSubdirectoriesRecursively(result, change.FullPath);
             else
-            {
-                merger.Push(new Change(change));
-            }
+                result.Add(change.FullPath);
         }
-        return merger.Merged;
+
+        return result;
     }
 
-    private void PushCreateRecursively(ChangesMerger merger, FileSystemEventArgs change)
+    private void PushWithSubdirectoriesRecursively(HashSet<string> result, string path)
     {
         var queue = new Queue<string>();
-        queue.Enqueue(change.FullPath);
+        queue.Enqueue(path);
         while (queue.TryDequeue(out var current))
         {
-            merger.Push(new Change(current, ChangeType.Create));
-            if (File.Exists(current))
-                continue;
+            result.Add(current);
             
             if (!Directory.Exists(current) || !FileSystemAccessHelper.IsAccessible(current))
                 continue;

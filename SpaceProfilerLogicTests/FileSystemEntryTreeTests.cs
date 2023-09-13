@@ -1,6 +1,4 @@
 ﻿using FluentAssertions;
-using SpaceProfilerLogic;
-using SpaceProfilerLogic.DirectoryWatcher;
 using SpaceProfilerLogic.Tree;
 using SpaceProfilerLogicTests.TestHelpers;
 
@@ -23,7 +21,7 @@ public class FileSystemEntryTreeTests
         CreateTreeOnDisk(rootFullName);
         
         var tree = new FileSystemEntryTree(rootFullName);
-        var changed = tree.Apply(new Change($"{rootFullName}\\1\\11\\111f", ChangeType.Create));
+        var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\111f");
 
         var file = new FileEntry($"{rootFullName}\\1\\11\\111f", 1000);
         var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 1000)
@@ -50,9 +48,9 @@ public class FileSystemEntryTreeTests
         CreateTreeOnDisk(rootFullName);
         
         var tree = new FileSystemEntryTree(rootFullName);
-        tree.Apply(new Change($"{rootFullName}\\1", ChangeType.Create));
+        tree.SynchronizeWithFileSystem($"{rootFullName}\\1");
         
-        var changed = tree.Apply(new Change($"{rootFullName}\\1\\11\\112f", ChangeType.Create));
+        var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11\\112f");
 
         var file = new FileEntry($"{rootFullName}\\1\\11\\112f", 0);
         var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 0)
@@ -79,7 +77,7 @@ public class FileSystemEntryTreeTests
         CreateTreeOnDisk(rootFullName);
         
         var tree = new FileSystemEntryTree(rootFullName);
-        var changed = tree.Apply(new Change($"{rootFullName}\\1\\11", ChangeType.Create));
+        var changed = tree.SynchronizeWithFileSystem($"{rootFullName}\\1\\11");
 
         var dir2 = new DirectoryEntry($"{rootFullName}\\1\\11", 0);
         var dir1 = new DirectoryEntry($"{rootFullName}\\1", 0)

@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using SpaceProfilerLogic.DirectoryWatcher;
 using SpaceProfilerLogicTests.TestHelpers;
 
 namespace SpaceProfilerLogicTests.DirectoryWatcher;
@@ -27,10 +26,7 @@ public class DirectoryWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1"), ChangeType.Create),
-        };
+        var expected = BuildExpected("1");
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -45,10 +41,7 @@ public class DirectoryWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1"), ChangeType.Create),
-        };
+        var expected = BuildExpected("1");
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -71,17 +64,16 @@ public class DirectoryWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<Change>
-        {
-            new (GetFullPath("destination"), ChangeType.Update),
-            new (GetFullPath("toMove"), ChangeType.Delete),
-            new (GetFullPath("destination\\toMove"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\1f"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\1"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2\\1f"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2\\2f"), ChangeType.Create),
-        };
+        var expected = BuildExpected(
+        "destination",
+            "toMove",
+            "destination\\toMove",
+            "destination\\toMove\\1f",
+            "destination\\toMove\\1",
+            "destination\\toMove\\2",
+            "destination\\toMove\\2\\1f",
+            "destination\\toMove\\2\\2f"
+        );
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -104,15 +96,14 @@ public class DirectoryWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<Change>
-        {
-            new (GetFullPath("destination\\toMove"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\1"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2\\1f"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\2\\2f"), ChangeType.Create),
-            new (GetFullPath("destination\\toMove\\1f"), ChangeType.Create),
-        };
+        var expected = BuildExpected(
+            "destination\\toMove",
+            "destination\\toMove\\1",
+            "destination\\toMove\\2",
+            "destination\\toMove\\2\\1f",
+            "destination\\toMove\\2\\2f",
+            "destination\\toMove\\1f"
+        );
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -128,10 +119,7 @@ public class DirectoryWatcherTests
         Thread.Sleep(100);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1"), ChangeType.Delete),
-        };
+        var expected = BuildExpected("1");
         
         actual.Should().BeEquivalentTo(expected);
     }
@@ -150,14 +138,13 @@ public class DirectoryWatcherTests
         Thread.Sleep(200);
 
         var actual = watcher.FlushChanges();
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1"), ChangeType.Delete),
-            new (GetFullPath("1\\1f"), ChangeType.Delete),
-            new (GetFullPath("1\\2\\2f"), ChangeType.Delete),
-            new (GetFullPath("1\\2"), ChangeType.Delete),
-            new (GetFullPath("1\\3"), ChangeType.Delete),
-        };
+        var expected = BuildExpected(
+            "1",
+            "1\\1f",
+            "1\\2\\2f",
+            "1\\2",
+            "1\\3"
+        );
         
         actual.Should().BeEquivalentTo(expected);
     }
@@ -175,10 +162,7 @@ public class DirectoryWatcherTests
         
         var actual = watcher.FlushChanges();
 
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1\\1f"), ChangeType.Delete),
-        };
+        var expected = BuildExpected("1\\1f");
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -196,15 +180,25 @@ public class DirectoryWatcherTests
         Thread.Sleep(100);
         
         var actual = watcher.FlushChanges();
-        var expected = new List<Change>
-        {
-            new (GetFullPath("1"), ChangeType.Update),
-            new (GetFullPath("1\\2"), ChangeType.Update),
-            new (GetFullPath("1\\2\\1f"), ChangeType.Update),
-        };
+        var expected = BuildExpected(
+            "1",
+            "1\\2",
+            "1\\2\\1f"
+        );
 
 
         actual.Should().BeEquivalentTo(expected);
+    }
+
+    private HashSet<string> BuildExpected(params string[] paths)
+    {
+        var result = new HashSet<string>();
+        foreach (var path in paths)
+        {
+            result.Add(GetFullPath(path));
+        }
+
+        return result;
     }
 
     private string GetFullPath(string path) => Path.GetFullPath(Path.Combine(root, path));
