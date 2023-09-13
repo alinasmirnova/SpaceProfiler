@@ -31,7 +31,7 @@
                             <ColumnDefinition Width="Auto" MinWidth="200" SharedSizeGroup="B"></ColumnDefinition>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="C"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Margin="10 0" Text="{Binding Name}" />
+                        <TextBlock Grid.Column="0" Text="{Binding Name}" />
                         <TextBlock Grid.Column="1" Margin="10 0" Text="{Binding Size}" />
                         <TextBlock Grid.Column="2" Margin="10 0" Text="{Binding PercentFromRoot}" />
                     </Grid>
