@@ -8,9 +8,14 @@
         mc:Ignorable="d"
         Title="Space Profiler" Height="450" Width="800" Icon="Icons\icons8-rocket-take-off-32.png">
     <DockPanel>
-       <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
+       <Grid DockPanel.Dock="Top" VerticalAlignment="Center" Margin="5">
+           <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="32"></ColumnDefinition>
+               <ColumnDefinition></ColumnDefinition>
+           </Grid.ColumnDefinitions>
            <Button Width="27" Height="27" Margin="0,0,5,0" Click="SelectDirectoryButton_Click" Background="White"><Image Margin="1,0" Source="Icons\icons8-directory-32.png" /></Button>
-       </StackPanel>
+           <TextBlock Grid.Column="1" Margin="0 0 5 0" Text="{Binding CurrentDirectory}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"></TextBlock>
+       </Grid>
         
         <TreeView ItemsSource="{Binding Items}" Grid.IsSharedSizeScope="True">
             <TreeView.ItemContainerStyle>
