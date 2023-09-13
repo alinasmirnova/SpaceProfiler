@@ -8,6 +8,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
     private DirectoryEntry Directory => (DirectoryEntry) Entry!;
     public DirectoryViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Subdirectories.Any() || entry.Files.Any())
     {
+        SetIcon();
     }
 
     public string Name => Directory.Name;
@@ -30,6 +31,13 @@ public class DirectoryViewModel : TreeViewItemViewModel
                 Children?.Add(new FileViewModel(entryFile, Root));
             }
         }
+    }
+
+    protected override void OnExpandedChanged() => SetIcon();
+
+    private void SetIcon()
+    {
+        Icon = IsExpanded ? Icons.OpenedDirectory : Icons.Directory;
     }
 
     protected override bool HasChildrenChanged()

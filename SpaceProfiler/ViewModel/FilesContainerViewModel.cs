@@ -10,6 +10,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
     public FilesContainerViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Files.Any())
     {
         Count = entry.Files.Length;
+        Icon = Icons.Files;
     }
 
     private int count;

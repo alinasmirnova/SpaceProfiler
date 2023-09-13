@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Resource Include="Icons\opened-folder.png" />
+      <None Remove="Icons\moon-rover-64.png" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,5 +21,15 @@
 
     <ItemGroup>
       <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Icons\icons8-book-stack-16.png" />
+      <Resource Include="Icons\icons8-directory-32.png" />
+      <Resource Include="Icons\icons8-file-16.png" />
+      <Resource Include="Icons\icons8-folder-16.png" />
+      <Resource Include="Icons\icons8-opened-folder-16.png" />
+      <Resource Include="Icons\icons8-rocket-take-off-32.png" />
+      <Resource Include="Icons\icons8-document-16.png" />
     </ItemGroup>
 </Project>

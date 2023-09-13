@@ -18,6 +18,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         size = string.Empty;
         percentFromRoot = string.Empty;
         name = string.Empty;
+        icon = string.Empty;
     }
 
     protected TreeViewItemViewModel(FileSystemEntry entry, FileSystemEntry? root, bool hasChildren)
@@ -30,6 +31,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         Root = root;
         SizeValue = GetSize();
         name = Entry.Name;
+        icon = string.Empty;
     }
 
     public FileSystemEntry? Entry { get; }
@@ -47,6 +49,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             PercentFromRoot = $"{percent:P}";
             Size = FileSizeHelper.ToHumanReadableString(value.Value);
             FontWeight = percent > 0.1 ? "Bold" : "Normal";
+            OnSizeChanged();
         }
     }
 
@@ -89,6 +92,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             if (value != isExpanded)
             {
                 isExpanded = value;
+                OnExpandedChanged();
                 OnPropertyChanged();
             }
 
@@ -126,10 +130,26 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         }
     }
 
+    private string icon;
+    public string Icon
+    {
+        get => icon;
+        set
+        {
+            if (value == icon) return;
+            icon = value;
+            OnPropertyChanged();
+        }
+    }
+
     protected virtual void LoadChildren() {}
     protected virtual bool HasChildrenChanged() => false;
     protected virtual bool HasChildren() => false;
     protected virtual long GetSize() => Entry?.GetSize ?? 0;
+    protected virtual void OnExpandedChanged() { }
+    protected virtual void OnSizeChanged() { }
+
+
     public virtual void Update()
     {
         if (Entry == null)
@@ -152,9 +172,11 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         if (HasChildren())
             Children?.Add(UnloadedChild);
     }
-    
+
     #region INotifyPropertyChanged Members
+
     public event PropertyChangedEventHandler? PropertyChanged;
+
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
@@ -168,5 +190,6 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         OnPropertyChanged(propertyName);
         return true;
     }
+
     #endregion
 }
