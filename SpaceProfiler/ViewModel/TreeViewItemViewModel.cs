@@ -12,6 +12,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     private static readonly TreeViewItemViewModel UnloadedChild = new();
 
     public ObservableCollection<TreeViewItemViewModel> Children { get; } = new();
+    protected readonly Dictionary<FileSystemEntry, TreeViewItemViewModel> ChildrenByEntry = new();
     public bool Loaded => !(Children.Count == 1 && Children[0] == UnloadedChild);
 
     private TreeViewItemViewModel()
@@ -162,6 +163,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         viewModel.UpdateSize();
         viewModel.UpdateIcon();
         Children.Add(viewModel);
+        ChildrenByEntry.Add(viewModel.Entry!, viewModel);
     }
 
     private void RemoveChildren(IEnumerable<TreeViewItemViewModel> viewModels)
@@ -169,6 +171,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         foreach (var viewModel in viewModels)
         {
             Children.Remove(viewModel);
+            ChildrenByEntry.Remove(viewModel.Entry!);
         }
     }
 

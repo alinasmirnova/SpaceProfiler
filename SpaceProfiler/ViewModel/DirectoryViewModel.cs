@@ -66,11 +66,11 @@ public class DirectoryViewModel : TreeViewItemViewModel
         if (child is FileViewModel && needFilesContainer)
             return true;
 
-        if (child is FileViewModel && directory.Files.All(f => f != child.Entry))
+        if (child is FileViewModel && !directory.ContainsFile(child.Name))
             return true;
         
         if (child is DirectoryViewModel) 
-            return directory.Subdirectories.All(f => f != child.Entry);
+            return !directory.ContainsSubdirectory(child.Name);
 
         return false;
     }
@@ -88,14 +88,14 @@ public class DirectoryViewModel : TreeViewItemViewModel
         {
             foreach (var file in Directory.Files)
             {
-                if (Children.All(c => c.Entry != file))
+                if (!ChildrenByEntry.ContainsKey(file))
                     result.Add(new FileViewModel(file));
             }
         }
 
         foreach (var subdirectory in Directory.Subdirectories)
         {
-            if (Children.All(c => c.Entry != subdirectory))
+            if (!ChildrenByEntry.ContainsKey(subdirectory))
                 result.Add(new DirectoryViewModel(subdirectory));
         }
 

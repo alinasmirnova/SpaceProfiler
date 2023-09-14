@@ -54,7 +54,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
 
     public override List<TreeViewItemViewModel> GetExtraChildren()
     {
-        return Children.Where(child => !Directory.Files.Contains(child.Entry)).ToList();
+        return Children.Where(child => !Directory.ContainsFile(child.Name)).ToList();
     }
 
     public override List<TreeViewItemViewModel> GetMissingChildren()
@@ -63,7 +63,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
 
         foreach (var file in Directory.Files)
         {
-            if (Children.All(child => child.Entry != file))
+            if (!ChildrenByEntry.ContainsKey(file))
                 result.Add(new FileViewModel(file));
         }
         

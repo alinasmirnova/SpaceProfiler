@@ -82,6 +82,9 @@ public class DirectoryEntry : FileSystemEntry
         return false;
     }
 
+    public bool ContainsFile(string fileName) => files.ContainsKey(fileName);
+    public bool ContainsSubdirectory(string fileName) => subdirectories.ContainsKey(fileName);
+
     public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
     {
     }
