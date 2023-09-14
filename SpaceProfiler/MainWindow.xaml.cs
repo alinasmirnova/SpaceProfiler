@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Windows;
 using Ookii.Dialogs.Wpf;
+using SpaceProfiler.Helpers;
 using SpaceProfiler.ViewModel;
 using SpaceProfilerLogic;
 
@@ -12,9 +13,7 @@ namespace SpaceProfiler
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel viewModel;
-        private SelfSustainableTree? tree;
-        private bool syncInProgress = false;
-        private readonly Thread background;
+        private NodesUpdater? nodesUpdater;
         
         public MainWindow()
         {
@@ -22,7 +21,6 @@ namespace SpaceProfiler
 
             viewModel = new MainWindowViewModel();
             DataContext = viewModel;
-            background = new Thread(UpdateTree) { IsBackground = true };
         }
         
         private void SelectDirectoryButton_Click(object sender, RoutedEventArgs e)
@@ -39,35 +37,12 @@ namespace SpaceProfiler
                     return;
                 
                 viewModel.CurrentDirectory = dialog.SelectedPath;
-                tree?.Dispose();
+                nodesUpdater?.Dispose();
                 
-                tree = new SelfSustainableTree(dialog.SelectedPath);
-                if (tree?.Root != null)
-                {
-                    viewModel.Items = new[] { new DirectoryViewModel(tree.Root, tree.Root) };
-                    if (!syncInProgress)
-                    {
-                        background.Start();
-                        syncInProgress = true;
-                    }
-                }
-            }
-        }
-
-        private void UpdateTree()
-        {
-            while (syncInProgress)
-            {
-                if (tree != null)
-                {
-                    var changes = tree.GetChangedNodes();
-                    var changedNodes = viewModel.GetNodesForUpdate(changes);
-                    foreach (var node in changedNodes)
-                    {
-                        Dispatcher.Invoke(() => { node.Update(); });
-                    }
-                }
-                Thread.Sleep(100);
+                var tree = new SelfSustainableTree(dialog.SelectedPath);
+                var rootViewModel = new DirectoryViewModel(tree.Root);
+                viewModel.Items = new[] { rootViewModel };
+                nodesUpdater = new NodesUpdater(rootViewModel, tree, Dispatcher);
             }
         }
     }

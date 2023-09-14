@@ -14,8 +14,8 @@ public class SelfSustainableTree : IDisposable
     private readonly List<Thread> workers = new();
     private readonly DirectoryWatcher.DirectoryWatcher directoryWatcher;
 
-    public DirectoryEntry? Root => Tree?.Root;
-    public FileSystemEntryTree? Tree { get; }
+    public DirectoryEntry Root => Tree.Root;
+    public FileSystemEntryTree Tree { get; }
     public bool Loaded { get; private set; }
 
     public SelfSustainableTree(string rootFullPath)

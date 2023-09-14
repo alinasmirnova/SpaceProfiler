@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using SpaceProfiler.Helpers;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
@@ -6,78 +9,101 @@ namespace SpaceProfiler.ViewModel;
 public class DirectoryViewModel : TreeViewItemViewModel
 {
     private DirectoryEntry Directory => (DirectoryEntry) Entry!;
-    public DirectoryViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Subdirectories.Any() || entry.Files.Any())
+    private FilesContainerViewModel? filesContainer;
+    
+    public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.Subdirectories.Any() || entry.Files.Any())
     {
-        SetIcon();
+        Name = entry.Name;
     }
 
-    public string Name => Directory.Name;
+    protected override void UpdateIcon()
+    {
+        Icon = IsExpanded ? Icons.OpenedDirectory : Icons.Directory;
+    }
 
     protected override void LoadChildren()
     {
         foreach (var child in Directory.Subdirectories)
         {
-            Children?.Add(new DirectoryViewModel(child, Root));
+            AddChild(new DirectoryViewModel(child));
         }
 
         if (NeedFilesContainer())
         {
-            Children?.Add(new FilesContainerViewModel(Directory, Root));
+            filesContainer = new FilesContainerViewModel(Directory);
+            AddChild(filesContainer);
         }
         else
         {
-            foreach (var entryFile in Directory.Files)
+            if (Directory.Files.Any())
             {
-                Children?.Add(new FileViewModel(entryFile, Root));
+                foreach (var file in Directory.Files)
+                {
+                    AddChild(new FileViewModel(file));
+                }
             }
         }
     }
 
-    protected override void OnExpandedChanged() => SetIcon();
-
-    private void SetIcon()
+    public override List<TreeViewItemViewModel> GetExtraChildren()
     {
-        Icon = IsExpanded ? Icons.OpenedDirectory : Icons.Directory;
+        var needsFilesContainer = NeedFilesContainer();
+
+        if (filesContainer != null && IsExtraChild(Directory, filesContainer, needsFilesContainer))
+            filesContainer = null;
+        
+        return Children.Where(child => IsExtraChild(Directory, child, needsFilesContainer)).ToList();
     }
 
-    protected override bool HasChildrenChanged()
+    private static bool IsExtraChild(DirectoryEntry directory, TreeViewItemViewModel child, bool needFilesContainer)
     {
-        if (Children == null)
-            return false;
-        
-        var count = Directory.Subdirectories.Length;
-        if (NeedFilesContainer())
-            count++;
-        else
-        {
-            count += Directory.Files.Length;
-        }
-        
-        if (count != Children.Count)
+        if (child is FilesContainerViewModel && !needFilesContainer)
             return true;
 
-        for (var i = 0; i < Directory.Subdirectories.Length; i++)
-        {
-            if (Directory.Subdirectories[i] != Children[i].Entry)
-                return true;
-        }
+        if (child is FilesContainerViewModel && needFilesContainer)
+            return false;
 
-        var current = Directory.Subdirectories.Length;
-        if (NeedFilesContainer())
-            return Children.Last() is not FilesContainerViewModel;
+        if (child is FileViewModel && needFilesContainer)
+            return true;
 
-        for (var i = 0; i < Directory.Files.Length; i++)
-        {
-            if (Directory.Files[i] != Children[current + i].Entry)
-                return true;
-        }
+        if (child is FileViewModel && directory.Files.All(f => f != child.Entry))
+            return true;
+        
+        if (child is DirectoryViewModel) 
+            return directory.Subdirectories.All(f => f != child.Entry);
+
         return false;
+    }
+
+    public override List<TreeViewItemViewModel> GetMissingChildren()
+    {
+        var result = new List<TreeViewItemViewModel>();
+        if (NeedFilesContainer() && filesContainer == null)
+        {
+            filesContainer = new FilesContainerViewModel(Directory);
+            result.Add(filesContainer);
+        }
+        
+        if (!NeedFilesContainer())
+        {
+            foreach (var file in Directory.Files)
+            {
+                if (Children.All(c => c.Entry != file))
+                    result.Add(new FileViewModel(file));
+            }
+        }
+
+        foreach (var subdirectory in Directory.Subdirectories)
+        {
+            if (Children.All(c => c.Entry != subdirectory))
+                result.Add(new DirectoryViewModel(subdirectory));
+        }
+
+        return result;
     }
 
     private bool NeedFilesContainer()
     {
         return Directory.Subdirectories.Any() && Directory.Files.Length > 1;
     }
-
-    protected override bool HasChildren() => Directory.Subdirectories.Any() || Directory.Files.Any();
 }

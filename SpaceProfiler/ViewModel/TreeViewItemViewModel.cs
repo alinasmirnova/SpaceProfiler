@@ -11,63 +11,47 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 {
     private static readonly TreeViewItemViewModel UnloadedChild = new();
 
-    public ObservableCollection<TreeViewItemViewModel>? Children { get; }
+    public ObservableCollection<TreeViewItemViewModel> Children { get; } = new();
+    public bool Loaded => !(Children.Count == 1 && Children[0] == UnloadedChild);
 
     private TreeViewItemViewModel()
     {
         size = string.Empty;
         percentFromRoot = string.Empty;
+        fontWeight = string.Empty;
         name = string.Empty;
         icon = string.Empty;
     }
 
-    protected TreeViewItemViewModel(FileSystemEntry entry, FileSystemEntry? root, bool hasChildren)
+    protected TreeViewItemViewModel(FileSystemEntry entry, bool hasChildren) : this()
     {
-        Children = new ObservableCollection<TreeViewItemViewModel>();
         if (hasChildren)
             Children.Add(UnloadedChild);
 
         Entry = entry;
-        Root = root;
-        SizeValue = GetSize();
-        name = Entry.Name;
-        icon = string.Empty;
+        UpdateFontWeight(0);
     }
 
     public FileSystemEntry? Entry { get; }
-    public FileSystemEntry? Root { get; }
     
-    private long? sizeValue;
-    public long? SizeValue
-    {
-        get => sizeValue ?? 0;
-        set
-        {
-            if (value == sizeValue || value == null) return;
-            sizeValue = value;
-            var percent = FileSizeHelper.GetPercent(value.Value, Root?.GetSize);
-            PercentFromRoot = $"{percent:P}";
-            Size = FileSizeHelper.ToHumanReadableString(value.Value);
-            FontWeight = percent > 0.1 ? "Bold" : "Normal";
-            OnSizeChanged();
-        }
-    }
-
-    private string size = null!;
+    private string size;
     public string Size
     {
         get => size;
-        private set
+        protected set
         {
             if (value != size)
             {
                 size = value;
+                UpdateIcon();
                 OnPropertyChanged();
             }
         }
     }
+
+    public virtual void UpdateSize() => Size = FileSizeHelper.ToHumanReadableString(Entry?.GetSize);
     
-    private string percentFromRoot = null!;
+    private string percentFromRoot;
     public string PercentFromRoot
     {
         get => percentFromRoot;
@@ -81,7 +65,16 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool NotFullyLoaded => Children?.Count == 1 && Children[0] == UnloadedChild;
+    public virtual void UpdatePercentFromRoot(long? rootSize)
+    {
+        UpdatePercentFromRootInternal(FileSizeHelper.GetPercent(Entry?.GetSize, rootSize));
+    }
+
+    protected void UpdatePercentFromRootInternal(double percent)
+    {
+        PercentFromRoot = FileSizeHelper.ToPercentString(percent);
+        UpdateFontWeight(percent);
+    }
 
     private bool isExpanded;
     public bool IsExpanded
@@ -92,19 +85,19 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             if (value != isExpanded)
             {
                 isExpanded = value;
-                OnExpandedChanged();
+                UpdateIcon();
                 OnPropertyChanged();
             }
 
-            if (NotFullyLoaded)
+            if (!Loaded)
             {
-                Children?.RemoveAt(0);
+                Children.RemoveAt(0);
                 LoadChildren();
             }
         }
     }
 
-    private string fontWeight = null!;
+    private string fontWeight;
     public string FontWeight
     {
         get => fontWeight;
@@ -118,11 +111,13 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         }
     }
 
+    private void UpdateFontWeight(double percent) => FontWeight = percent > 0.2 ? "Bold" : "Normal";
+
     private string name;
     public string Name
     {
         get => name;
-        set
+        protected set
         {
             if (value == name) return;
             name = value;
@@ -134,7 +129,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     public string Icon
     {
         get => icon;
-        set
+        protected set
         {
             if (value == icon) return;
             icon = value;
@@ -142,35 +137,39 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         }
     }
 
-    protected virtual void LoadChildren() {}
-    protected virtual bool HasChildrenChanged() => false;
-    protected virtual bool HasChildren() => false;
-    protected virtual long GetSize() => Entry?.GetSize ?? 0;
-    protected virtual void OnExpandedChanged() { }
-    protected virtual void OnSizeChanged() { }
+    protected virtual void UpdateIcon() { }
 
+    protected virtual void LoadChildren() { }
 
-    public virtual void Update()
+    public virtual void Update(IEnumerable<TreeViewItemViewModel> toAdd, IEnumerable<TreeViewItemViewModel> toDelete, long? rootSize)
     {
-        if (Entry == null)
-            return;
-        
-        SizeValue = GetSize();
-        if (HasChildren() && NotFullyLoaded)
-            return;
+        AddChildren(toAdd);
+        RemoveChildren(toDelete);
+        UpdateSize();
+        UpdatePercentFromRoot(rootSize);
+    }
 
-        if (!HasChildren() && NotFullyLoaded)
+    private void AddChildren(IEnumerable<TreeViewItemViewModel> viewModels)
+    {
+        foreach (var viewModel in viewModels)
         {
-            Children?.Clear();
-            return;
+            AddChild(viewModel);
         }
-        
-        if (!HasChildrenChanged()) return;
-        
-        IsExpanded = false;
-        Children?.Clear();
-        if (HasChildren())
-            Children?.Add(UnloadedChild);
+    }
+
+    protected void AddChild(TreeViewItemViewModel viewModel)
+    {
+        viewModel.UpdateSize();
+        viewModel.UpdateIcon();
+        Children.Add(viewModel);
+    }
+
+    private void RemoveChildren(IEnumerable<TreeViewItemViewModel> viewModels)
+    {
+        foreach (var viewModel in viewModels)
+        {
+            Children.Remove(viewModel);
+        }
     }
 
     #region INotifyPropertyChanged Members
@@ -192,4 +191,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     }
 
     #endregion
+
+    public virtual List<TreeViewItemViewModel> GetMissingChildren() => new();
+    public virtual List<TreeViewItemViewModel> GetExtraChildren() => new();
 }

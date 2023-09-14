@@ -4,7 +4,7 @@ namespace SpaceProfilerLogic.Tree;
 
 public class FileSystemEntryTree
 {
-    public DirectoryEntry? Root { get; set; }
+    public DirectoryEntry Root { get; set; }
 
     protected readonly ConcurrentDictionary<string, FileSystemEntry> nodes = new();
 
@@ -13,14 +13,15 @@ public class FileSystemEntryTree
         if (!Directory.Exists(fullRootName))
             throw new ArgumentException(nameof(fullRootName));
         fullRootName = fullRootName.TrimEnd('\\');
-        
-        Root = CreateDirectory(fullRootName, null);
+
+        Root = CreateDirectory(fullRootName, null) ??
+               throw new Exception($"Failed to create root for path {fullRootName}");
     }
 
     public FileSystemEntry?[] SynchronizeWithFileSystem(string path)
     {
         path = path.TrimEnd('\\');
-        if (Root == null || !path.StartsWith(Root.FullName))
+        if (!path.StartsWith(Root.FullName))
             return Array.Empty<FileSystemEntry>();
         
         if (Directory.Exists(path))
@@ -222,9 +223,7 @@ public class FileSystemEntryTree
             var entry = nodes[fullPath];
             if (entry == Root)
             {
-                Root = null;
-                nodes.Clear();
-                return Array.Empty<FileSystemEntry>();
+                throw new ArgumentException("Can not delete root node");
             }
 
             var parent = (DirectoryEntry)entry.Parent!;

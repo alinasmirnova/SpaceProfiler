@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
+using SpaceProfiler.Helpers;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
 
 public class FilesContainerViewModel : TreeViewItemViewModel
 {
-    private DirectoryEntry? Directory => (DirectoryEntry?)Entry;
-    public FilesContainerViewModel(DirectoryEntry entry, FileSystemEntry? root) : base(entry, root, entry.Files.Any())
+    private DirectoryEntry Directory => ((DirectoryEntry?)Entry)!;
+    public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.Files.Any())
     {
         Count = entry.Files.Length;
         Icon = Icons.Files;
@@ -27,44 +28,45 @@ public class FilesContainerViewModel : TreeViewItemViewModel
         }
     }
 
-    protected override bool HasChildrenChanged()
+    protected override void LoadChildren()
     {
-        if (Children == null || Directory == null)
-            return false;
-        
-        if (Children.Count != Directory.Files.Length)
-            return true;
-
-        return Children.Where((t, i) => t.Entry != Directory.Files[i]).Any();
+        foreach (var fileEntry in Directory.Files)
+        {
+            AddChild(new FileViewModel(fileEntry));
+        }
     }
-    
-    protected override bool HasChildren() => Directory?.Files.Any() ?? false;
 
-    public override void Update()
+    public override void Update(IEnumerable<TreeViewItemViewModel> toAdd, IEnumerable<TreeViewItemViewModel> toDelete, long? rootSize)
     {
-        if (Directory == null)
-            return;
-        
-        base.Update();
+        base.Update(toAdd, toDelete, rootSize);
         Count = Directory.Files.Length;
     }
 
-    protected override long GetSize()
+    public override void UpdateSize()
     {
-        if (Directory == null)
-            return 0;
-        
-        return Directory.Files.Sum(f => f.GetSize);
+        Size = FileSizeHelper.ToHumanReadableString(Directory.Files.Sum(f => f.GetSize));
     }
 
-    protected override void LoadChildren()
+    public override void UpdatePercentFromRoot(long? rootSize)
     {
-        if (Directory == null)
-            return;
-        
-        foreach (var fileEntry in Directory.Files)
+        UpdatePercentFromRootInternal(FileSizeHelper.GetPercent(Directory.Files.Sum(f => f.GetSize), rootSize));
+    }
+
+    public override List<TreeViewItemViewModel> GetExtraChildren()
+    {
+        return Children.Where(child => !Directory.Files.Contains(child.Entry)).ToList();
+    }
+
+    public override List<TreeViewItemViewModel> GetMissingChildren()
+    {
+        var result = new List<TreeViewItemViewModel>();
+
+        foreach (var file in Directory.Files)
         {
-            Children?.Add(new FileViewModel(fileEntry, Root));
+            if (Children.All(child => child.Entry != file))
+                result.Add(new FileViewModel(file));
         }
+        
+        return result;
     }
 }

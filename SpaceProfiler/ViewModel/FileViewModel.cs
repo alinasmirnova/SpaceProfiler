@@ -5,21 +5,14 @@ namespace SpaceProfiler.ViewModel;
 public class FileViewModel : TreeViewItemViewModel
 {
     private readonly FileEntry entry;
-    public FileViewModel(FileEntry entry, FileSystemEntry? root) : base(entry, root, false)
+    public FileViewModel(FileEntry entry) : base(entry, false)
     {
         this.entry = entry;
-        SetIcon();
-    }
-    
-    public string Name => entry.Name;
-
-    protected override void OnSizeChanged()
-    {
-        SetIcon();
+        Name = entry.Name;
     }
 
-    private void SetIcon()
+    protected override void UpdateIcon()
     {
-        Icon = GetSize() == 0 ? Icons.EmptyFile : Icons.File;
+        Icon = entry.GetSize == 0 ? Icons.EmptyFile : Icons.File;
     }
 }
