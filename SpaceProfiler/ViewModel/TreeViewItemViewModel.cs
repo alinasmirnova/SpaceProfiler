@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using SpaceProfiler.Helpers;
 using SpaceProfilerLogic.Tree;
 
@@ -119,6 +120,20 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             }
         }
     }
+    
+    private bool isSelected;
+    public bool IsSelected
+    {
+        get => isSelected;
+        set
+        {
+            if (value != isSelected)
+            {
+                isSelected = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     private string fontWeight;
     public string FontWeight
@@ -172,6 +187,9 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    
+    private OpenInExplorerCommand? closeCommand;
+    public ICommand CloseCommand => closeCommand ??= new OpenInExplorerCommand(this);
 
     protected virtual void UpdateIcon() { }
 

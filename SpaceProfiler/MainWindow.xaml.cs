@@ -1,5 +1,6 @@
-﻿using System.Threading;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Ookii.Dialogs.Wpf;
 using SpaceProfiler.Helpers;
 using SpaceProfiler.ViewModel;
@@ -42,6 +43,14 @@ namespace SpaceProfiler
                 var tree = new SelfSustainableTree(dialog.SelectedPath);
                 viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
                 nodesUpdater = new NodesUpdater(viewModel, tree, Dispatcher);
+            }
+        }
+
+        private void treeView_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if ((sender as TreeViewItem)?.DataContext is TreeViewItemViewModel cvm)
+            {
+                cvm.IsSelected = true;
             }
         }
     }
