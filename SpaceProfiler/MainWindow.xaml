@@ -8,6 +8,9 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="Space Profiler" Height="450" Width="800" Icon="Icons\icons8-rocket-take-off-32.png">
+    <Window.Resources>
+        <local:TreeViewItemSortingConverter x:Key="SortingConverter" />
+    </Window.Resources>
     <DockPanel>
        <Grid DockPanel.Dock="Top" VerticalAlignment="Center" Margin="5">
            <Grid.ColumnDefinitions>
@@ -33,7 +36,7 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate 
                     DataType="{x:Type viewModel:TreeViewItemViewModel}" 
-                    ItemsSource="{Binding Children}"
+                    ItemsSource="{Binding Children, Converter={StaticResource SortingConverter}, ConverterParameter=SizeValue}"
                 >
                     <Grid Opacity="{Binding Opacity}">
                         <Grid.ColumnDefinitions>

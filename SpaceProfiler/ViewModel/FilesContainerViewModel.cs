@@ -44,7 +44,8 @@ public class FilesContainerViewModel : TreeViewItemViewModel
 
     public override void UpdateSize()
     {
-        Size = FileSizeHelper.ToHumanReadableString(Directory.Files.Sum(f => f.GetSize));
+        SizeValue = Directory.Files.Sum(f => f.GetSize);
+        Size = FileSizeHelper.ToHumanReadableString(SizeValue);
     }
 
     public override void UpdatePercentFromRoot(long? rootSize)

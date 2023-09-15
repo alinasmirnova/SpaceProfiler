@@ -50,9 +50,28 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
             }
         }
     }
-
-    public virtual void UpdateSize() => Size = FileSizeHelper.ToHumanReadableString(Entry?.GetSize);
     
+    private long sizeValue;
+    public long SizeValue
+    {
+        get => sizeValue;
+        protected set
+        {
+            if (value != sizeValue)
+            {
+                sizeValue = value;
+                UpdateIcon();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public virtual void UpdateSize()
+    {
+        SizeValue = Entry?.GetSize ?? 0;
+        Size = FileSizeHelper.ToHumanReadableString(SizeValue);
+    }
+
     private string percentFromRoot;
     public string PercentFromRoot
     {
@@ -89,6 +108,8 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
                 isExpanded = value;
                 UpdateIcon();
                 OnPropertyChanged();
+                if (value && Loaded)
+                    OnPropertyChanged(nameof(Children));
             }
 
             if (!Loaded)
