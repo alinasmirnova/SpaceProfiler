@@ -8,10 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Icons\moon-rover-64.png" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SpaceProfilerLogic\SpaceProfilerLogic.csproj" />
     </ItemGroup>
 
@@ -32,5 +28,6 @@
       <Resource Include="Icons\icons8-opened-folder-16.png" />
       <Resource Include="Icons\icons8-rocket-take-off-32.png" />
       <Resource Include="Icons\icons8-document-16.png" />
+      <Resource Include="Icons\icons8-access-denied-16.png" />
     </ItemGroup>
 </Project>

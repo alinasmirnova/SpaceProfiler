@@ -53,7 +53,7 @@ public class SelfSustainableTreeChangesTests
         
         DoWithDelay(tree, () => helper.CreateDirectory("3"));
 
-        var newDir = new DirectoryEntry($"{rootFullName}\\3");
+        var newDir = new DirectoryEntry($"{rootFullName}\\3", 0);
         expectedRoot.Subdirectories = expectedRoot.Subdirectories.Concat(new[] { newDir }).ToArray();
         
         tree.Root.Should().BeEquivalentTo(expectedRoot, options);
@@ -67,7 +67,7 @@ public class SelfSustainableTreeChangesTests
         
         DoWithDelay(tree, () => helper.CreateDirectory("2\\3"));
 
-        var newDir = new DirectoryEntry($"{rootFullName}\\2\\3");
+        var newDir = new DirectoryEntry($"{rootFullName}\\2\\3", 0);
         var parent = (DirectoryEntry) Find(expectedRoot, $"{rootFullName}\\2")!;
         parent.Subdirectories = new[] { newDir };
         
@@ -506,7 +506,7 @@ public class SelfSustainableTreeChangesTests
                         new DirectoryEntry($@"{root}\1\12", 0),
                     }
                 },
-                new DirectoryEntry($"{root}\\2")
+                new DirectoryEntry($"{root}\\2", 0)
             }
         });
     }

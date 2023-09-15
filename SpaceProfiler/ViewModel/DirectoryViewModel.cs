@@ -18,7 +18,10 @@ public class DirectoryViewModel : TreeViewItemViewModel
 
     protected override void UpdateIcon()
     {
-        Icon = IsExpanded ? Icons.OpenedDirectory : Icons.Directory;
+        if (!Directory.IsAccessible)
+            Icon = Icons.Inaccessible;
+        else
+            Icon = IsExpanded ? Icons.OpenedDirectory : Icons.Directory;
     }
 
     protected override void LoadChildren()

@@ -29,7 +29,7 @@ public class SelfSustainableTreeLoadFromDiskTests
         var tree = new SelfSustainableTree(root);
         WaitUntilLoaded(tree, TimeSpan.FromMinutes(1));
 
-        tree.Root.Should().BeEquivalentTo(new DirectoryEntry(root));
+        tree.Root.Should().BeEquivalentTo(new DirectoryEntry(root, 0));
         tree.GetChangedNodes().Should().BeEmpty();
     }
 
@@ -41,15 +41,15 @@ public class SelfSustainableTreeLoadFromDiskTests
         var tree = new SelfSustainableTree(root);
         WaitUntilLoaded(tree, TimeSpan.FromMinutes(1));
 
-        var dir11 = new DirectoryEntry(@$"{root}\1\11");
-        var dir12 = new DirectoryEntry(@$"{root}\1\12");
-        var dir1 = new DirectoryEntry($"{root}\\1")
+        var dir11 = new DirectoryEntry(@$"{root}\1\11", 0);
+        var dir12 = new DirectoryEntry(@$"{root}\1\12", 0);
+        var dir1 = new DirectoryEntry($"{root}\\1", 0)
         {
             Subdirectories = new[] { dir11, dir12 }
         };
-        var dir2 = new DirectoryEntry($"{root}\\2");
+        var dir2 = new DirectoryEntry($"{root}\\2", 0);
 
-        var expectedRoot = new DirectoryEntry(root)
+        var expectedRoot = new DirectoryEntry(root, 0)
         {
             Subdirectories = new[] { dir1, dir2 }
         };
@@ -83,7 +83,7 @@ public class SelfSustainableTreeLoadFromDiskTests
             Files = new[] { file11, file12 },
             Subdirectories = new []{ dir11 }
         };
-        var dir2 = new DirectoryEntry($"{root}\\2");
+        var dir2 = new DirectoryEntry($"{root}\\2", 0);
         
         var expectedRoot = new DirectoryEntry(root, 6000)
         {

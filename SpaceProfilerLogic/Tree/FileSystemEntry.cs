@@ -4,17 +4,20 @@ public class FileSystemEntry
 {
     public string FullName { get; }
     public string Name { get; }
+    
+    public bool IsAccessible { get; }
 
     protected long Size;
     public long GetSize => Size;
 
     public FileSystemEntry? Parent { get; set; }
 
-    protected FileSystemEntry(string fullName, FileSystemEntry? parent = null)
+    protected FileSystemEntry(string fullName, bool isAccessible, FileSystemEntry? parent)
     {
         FullName = fullName.TrimEnd('\\');
         Name = FullName.Split('\\').Last();
         Parent = parent;
+        IsAccessible = isAccessible;
     }
     
     public bool AddSize(long diff)

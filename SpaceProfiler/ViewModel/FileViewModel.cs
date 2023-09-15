@@ -13,6 +13,9 @@ public class FileViewModel : TreeViewItemViewModel
 
     protected override void UpdateIcon()
     {
-        Icon = entry.GetSize == 0 ? Icons.EmptyFile : Icons.File;
+        if (!entry.IsAccessible)
+            Icon = Icons.Inaccessible;
+        else
+            Icon = entry.GetSize == 0 ? Icons.EmptyFile : Icons.File;
     }
 }

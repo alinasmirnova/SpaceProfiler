@@ -5,17 +5,33 @@ namespace SpaceProfilerLogic;
 
 public static class FileSystemAccessHelper
 {
-    public static bool IsAccessible(string path)
+    public static bool IsDirectoryAccessible(string path)
     {
         try
         {
             if (Directory.Exists(path))
-                Directory.EnumerateDirectories(path);
+                Directory.EnumerateFileSystemEntries(path);
+            
             return true;
         }
         catch (UnauthorizedAccessException e)
         {
             return false;
+        }
+    }
+
+    public static (bool, long) GetFileActualSize(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                return (true, new FileInfo(path).Length);
+            
+            return (true, 0);
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            return (false, 0);
         }
     }
 }

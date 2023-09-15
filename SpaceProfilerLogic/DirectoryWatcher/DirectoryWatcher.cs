@@ -10,7 +10,7 @@ public class DirectoryWatcher
 
     public void Start(string root)
     {
-        if (!FileSystemAccessHelper.IsAccessible(root))
+        if (!FileSystemAccessHelper.IsDirectoryAccessible(root))
             return;
         
         watcher = new FileSystemWatcher();
@@ -84,7 +84,7 @@ public class DirectoryWatcher
             
             result.Add(current);
             
-            if (!FileSystemAccessHelper.IsAccessible(current))
+            if (!FileSystemAccessHelper.IsDirectoryAccessible(current))
                 continue;
 
             foreach (var entry in Directory.EnumerateFileSystemEntries(current))

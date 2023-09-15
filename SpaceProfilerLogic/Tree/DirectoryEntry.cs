@@ -85,17 +85,13 @@ public class DirectoryEntry : FileSystemEntry
     public bool ContainsFile(string fileName) => files.ContainsKey(fileName);
     public bool ContainsSubdirectory(string fileName) => subdirectories.ContainsKey(fileName);
 
-    public DirectoryEntry(string fullName, FileSystemEntry? parent = null) : base(fullName, parent)
-    {
-    }
-    
-    public DirectoryEntry(string fullName, long size, FileSystemEntry? parent = null) : base(fullName, parent)
+   
+    public DirectoryEntry(string fullName, long size, bool isAccessible, FileSystemEntry? parent) : base(fullName, isAccessible, parent)
     {
         Size = size;
     }
-    
-    public DirectoryEntry(string fullName, long size) : base(fullName)
+
+    public DirectoryEntry(string fullName, long size) : this(fullName, size, true, null)
     {
-        Size = size;
     }
 }

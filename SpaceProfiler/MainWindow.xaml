@@ -35,7 +35,7 @@
                     DataType="{x:Type viewModel:TreeViewItemViewModel}" 
                     ItemsSource="{Binding Children}"
                 >
-                    <Grid>
+                    <Grid Opacity="{Binding Opacity}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="A"></ColumnDefinition>
                             <ColumnDefinition Width="Auto" MinWidth="200" SharedSizeGroup="B"></ColumnDefinition>

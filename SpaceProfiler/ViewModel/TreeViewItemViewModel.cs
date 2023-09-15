@@ -22,6 +22,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         fontWeight = string.Empty;
         name = string.Empty;
         icon = string.Empty;
+        opacity = CalculateOpacity();
     }
 
     protected TreeViewItemViewModel(FileSystemEntry entry, bool hasChildren) : this()
@@ -127,6 +128,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     }
 
     private string icon;
+
     public string Icon
     {
         get => icon;
@@ -134,6 +136,18 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         {
             if (value == icon) return;
             icon = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private double opacity;
+    public double Opacity
+    {
+        get => opacity;
+        set
+        {
+            if (value.Equals(opacity)) return;
+            opacity = value;
             OnPropertyChanged();
         }
     }
@@ -148,6 +162,12 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
         RemoveChildren(toDelete);
         UpdateSize();
         UpdatePercentFromRoot(rootSize);
+        Opacity = CalculateOpacity();
+    }
+
+    private double CalculateOpacity()
+    {
+        return Entry is {IsAccessible: false} ? 0.35 : 1;
     }
 
     private void AddChildren(IEnumerable<TreeViewItemViewModel> viewModels)
@@ -162,6 +182,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
     {
         viewModel.UpdateSize();
         viewModel.UpdateIcon();
+        viewModel.Opacity = viewModel.CalculateOpacity();
         Children.Add(viewModel);
         ChildrenByEntry.Add(viewModel.Entry!, viewModel);
     }

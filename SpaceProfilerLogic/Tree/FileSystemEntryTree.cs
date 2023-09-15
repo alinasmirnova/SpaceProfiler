@@ -81,7 +81,7 @@ public class FileSystemEntryTree
         DirectoryEntry result;
 
         var files = new List<FileEntry>();
-        if (FileSystemAccessHelper.IsAccessible(fullPath))
+        if (FileSystemAccessHelper.IsDirectoryAccessible(fullPath))
         {
             long sum = 0;
             foreach (var file in Directory.EnumerateFiles(fullPath))
@@ -89,19 +89,19 @@ public class FileSystemEntryTree
                 if (!File.Exists(file))
                     continue;
                 
-                var fileSize = FileSizeCalculator.GetFileSize(file);
-                files.Add(new FileEntry(file, fileSize));
+                var (isAccessible, fileSize) = FileSystemAccessHelper.GetFileActualSize(file);
+                files.Add(new FileEntry(file, fileSize, isAccessible));
                 sum += fileSize;
             }
 
-            result = new DirectoryEntry(fullPath, sum, parent)
+            result = new DirectoryEntry(fullPath, sum, true, parent)
             {
                 Files = files.ToArray()
             };
         }
         else
         {
-            result = new DirectoryEntry(fullPath, parent);
+            result = new DirectoryEntry(fullPath, 0, false, parent);
         }
         
         if (parent == null || parent.AddSubdirectory(result))
@@ -124,7 +124,8 @@ public class FileSystemEntryTree
             return createdParents.Concat(GetParents(parent))
                 .Concat(createdParents.SelectMany(p => p.Files)).Distinct().ToArray();
        
-        var file = new FileEntry(fullPath, FileSizeCalculator.GetFileSize(fullPath));
+        var (isAccessible, fileSize) = FileSystemAccessHelper.GetFileActualSize(fullPath);
+        var file = new FileEntry(fullPath, fileSize, isAccessible);
         if (!parent.AddFile(file))
             return Array.Empty<FileSystemEntry>();
 
@@ -154,7 +155,7 @@ public class FileSystemEntryTree
     {
         var result = new List<string>();
         var current = GetParentFullName(fullName);
-        while (current != Root!.FullName && !nodes.ContainsKey(current))
+        while (current != Root.FullName && !nodes.ContainsKey(current))
         {
             result.Add(current);
             current = GetParentFullName(current);
@@ -199,8 +200,8 @@ public class FileSystemEntryTree
             return CreateFile(fullPath);
 
         var file = nodes[fullPath];
-        var size = FileSizeCalculator.GetFileSize(fullPath);
-        var diff = size - file.GetSize;
+        var (_, fileSize) = FileSystemAccessHelper.GetFileActualSize(fullPath);
+        var diff = fileSize - file.GetSize;
         if (file.AddSize(diff))
         {
             var result = GetParents(file);
