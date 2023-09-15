@@ -8,6 +8,7 @@ public class SelfSustainableTree : IDisposable
     private readonly string rootFullPath;
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
     private readonly ConcurrentQueue<string> pathsToRenew = new();
+    private readonly ConcurrentQueue<string> pathsToLoad = new();
     
     private bool active;
 
@@ -17,8 +18,7 @@ public class SelfSustainableTree : IDisposable
     public DirectoryEntry Root => Tree.Root;
     public FileSystemEntryTree Tree { get; }
     public bool Loaded { get; private set; }
-    
-    public bool Loading { get; private set; }
+    public bool IsRead { get; set; }
 
     public SelfSustainableTree(string rootFullPath)
     {
@@ -32,12 +32,14 @@ public class SelfSustainableTree : IDisposable
         AddBackgroundWorker(WatchChanges);
         AddBackgroundWorker(ApplyChanges);
         AddBackgroundWorker(ApplyChanges);
+        AddBackgroundWorker(ApplyChanges);
+        AddBackgroundWorker(ApplyChanges);
 
         active = true;
         Loaded = false;
-        Loading = true;
         
         directoryWatcher.Start(this.rootFullPath);
+        pathsToLoad.Enqueue(rootFullPath);
         foreach (var worker in workers)
         {
             worker.Start();
@@ -72,15 +74,27 @@ public class SelfSustainableTree : IDisposable
     {
         while (active)
         {
+            while (pathsToLoad.TryDequeue(out var path))
+            {
+                ApplyChange(path);
+            }
+
+            Loaded = IsRead;
+            
             while (pathsToRenew.TryDequeue(out var path))
             {
-                var changed = Tree.SynchronizeWithFileSystem(path).Where(e => e != null).Cast<FileSystemEntry>();
-                foreach (var entry in changed)
-                {
-                    changedNodes.AddOrUpdate(entry, 0, (_, _) => 0);
-                }
+                ApplyChange(path);
             }
             Thread.Sleep(0);
+        }
+    }
+
+    private void ApplyChange(string path)
+    {
+        var changed = Tree.SynchronizeWithFileSystem(path).Where(e => e != null).Cast<FileSystemEntry>();
+        foreach (var entry in changed)
+        {
+            changedNodes.AddOrUpdate(entry, 0, (_, _) => 0);
         }
     }
 
@@ -90,7 +104,8 @@ public class SelfSustainableTree : IDisposable
         queue.Enqueue(rootFullPath);
         while (queue.TryDequeue(out var path) && active)
         {
-            pathsToRenew.Enqueue(path);
+            if (path != rootFullPath)
+                pathsToLoad.Enqueue(path);
             
             if (!FileSystemAccessHelper.IsDirectoryAccessible(path))
                 continue;
@@ -101,8 +116,7 @@ public class SelfSustainableTree : IDisposable
             }
         }
 
-        Loading = false;
-        Loaded = true;
+        IsRead = true;
     }
 
     private void AddBackgroundWorker(Action action)
