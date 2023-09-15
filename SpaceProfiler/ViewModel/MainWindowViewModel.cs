@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using SpaceProfilerLogic.Tree;
 
 namespace SpaceProfiler.ViewModel;
@@ -9,7 +10,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 {
     private string? currentDirectory;
     private DirectoryViewModel[]? items;
-    private long rootSize = 0;
 
     public string? CurrentDirectory
     {
@@ -32,7 +32,35 @@ public class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    
+
+    private Visibility loaderVisibility = Visibility.Hidden;
+
+    public Visibility LoaderVisibility
+    {
+        get => loaderVisibility;
+        set
+        {
+            if (value == loaderVisibility) return;
+            loaderVisibility = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string loadingTime = string.Empty;
+    public string LoadingTime
+    {
+        get => loadingTime;
+        set
+        {
+            if (value == "00:00")
+                value = string.Empty;
+
+            if (value == loadingTime) return;
+            loadingTime = value;
+            OnPropertyChanged();
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

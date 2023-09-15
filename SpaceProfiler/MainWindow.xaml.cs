@@ -40,9 +40,8 @@ namespace SpaceProfiler
                 nodesUpdater?.Dispose();
                 
                 var tree = new SelfSustainableTree(dialog.SelectedPath);
-                var rootViewModel = new DirectoryViewModel(tree.Root);
-                viewModel.Items = new[] { rootViewModel };
-                nodesUpdater = new NodesUpdater(rootViewModel, tree, Dispatcher);
+                viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
+                nodesUpdater = new NodesUpdater(viewModel, tree, Dispatcher);
             }
         }
     }

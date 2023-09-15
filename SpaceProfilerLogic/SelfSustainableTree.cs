@@ -17,6 +17,8 @@ public class SelfSustainableTree : IDisposable
     public DirectoryEntry Root => Tree.Root;
     public FileSystemEntryTree Tree { get; }
     public bool Loaded { get; private set; }
+    
+    public bool Loading { get; private set; }
 
     public SelfSustainableTree(string rootFullPath)
     {
@@ -32,6 +34,9 @@ public class SelfSustainableTree : IDisposable
         AddBackgroundWorker(ApplyChanges);
 
         active = true;
+        Loaded = false;
+        Loading = true;
+        
         directoryWatcher.Start(this.rootFullPath);
         foreach (var worker in workers)
         {
@@ -81,8 +86,6 @@ public class SelfSustainableTree : IDisposable
 
     private void LoadFromDisk()
     {
-        Loaded = false;
-        
         var queue = new Queue<string>();
         queue.Enqueue(rootFullPath);
         while (queue.TryDequeue(out var path) && active)
@@ -98,6 +101,7 @@ public class SelfSustainableTree : IDisposable
             }
         }
 
+        Loading = false;
         Loaded = true;
     }
 

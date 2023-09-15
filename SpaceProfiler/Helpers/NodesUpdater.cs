@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Windows;
 using System.Windows.Threading;
 using SpaceProfiler.ViewModel;
 using SpaceProfilerLogic;
@@ -11,20 +13,44 @@ namespace SpaceProfiler.Helpers;
 
 public class NodesUpdater : IDisposable
 {
-    private readonly DirectoryViewModel viewModel;
+    private readonly DirectoryViewModel treeRootViewModel;
+    private readonly MainWindowViewModel mainWindowViewModel;
     private readonly SelfSustainableTree model;
     private readonly Dispatcher dispatcher;
     private bool syncInProgress = false;
 
-    public NodesUpdater(DirectoryViewModel viewModel, SelfSustainableTree model, Dispatcher dispatcher)
+    public NodesUpdater(MainWindowViewModel mainWindowViewModel, SelfSustainableTree model, Dispatcher dispatcher)
     {
-        this.viewModel = viewModel;
+        if (mainWindowViewModel.Items == null || mainWindowViewModel.Items.Length != 1)
+            throw new ArgumentException("Failed to start update on empty tree");
+        
+        treeRootViewModel = mainWindowViewModel.Items[0];
+        this.mainWindowViewModel = mainWindowViewModel;
         this.model = model;
         this.dispatcher = dispatcher;
 
         var worker = new Thread(UpdateTree) { IsBackground = true };
+        var timer = new Thread(UpdateTimer) { IsBackground = true };
         syncInProgress = true;
         worker.Start();
+        timer.Start();
+    }
+
+    private void UpdateTimer()
+    {
+        dispatcher.Invoke(UpdateLoadingTime, mainWindowViewModel, model, TimeSpan.Zero);
+        dispatcher.Invoke(UpdateLoaderVisibility, mainWindowViewModel, Visibility.Hidden);
+
+        var stopWatch = Stopwatch.StartNew();
+        do
+        {
+            if (stopWatch.Elapsed.TotalSeconds >= 1)
+                dispatcher.Invoke(UpdateLoadingTime, mainWindowViewModel, model, stopWatch.Elapsed);
+            Thread.Sleep(300);
+        } while (syncInProgress && !model.Loaded);
+        stopWatch.Stop();
+
+        dispatcher.Invoke(UpdateLoaderVisibility, mainWindowViewModel, Visibility.Hidden);
     }
 
     private void UpdateTree()
@@ -34,7 +60,7 @@ public class NodesUpdater : IDisposable
             var changedNodes = model.GetChangedNodes();
 
             var queue = new Queue<TreeViewItemViewModel>();
-            queue.Enqueue(viewModel);
+            queue.Enqueue(treeRootViewModel);
             while (queue.TryDequeue(out var current))
             {
                 if (current.Entry == null)
@@ -61,6 +87,17 @@ public class NodesUpdater : IDisposable
             
             Thread.Sleep(100);
         }
+    }
+
+    private static void UpdateLoaderVisibility(MainWindowViewModel mainWindowViewModel, Visibility visibility)
+    {
+        mainWindowViewModel.LoaderVisibility = visibility;
+    }
+    
+    private static void UpdateLoadingTime(MainWindowViewModel mainWindowViewModel, SelfSustainableTree tree, TimeSpan loadingTime)
+    {
+        mainWindowViewModel.LoadingTime = loadingTime.ToString("mm\\:ss");
+        mainWindowViewModel.LoaderVisibility = !tree.Loaded ? Visibility.Visible : Visibility.Hidden;
     }
     
     private static void UpdateSize(TreeViewItemViewModel current, long? rootSize)
