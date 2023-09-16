@@ -94,11 +94,9 @@ public class DirectoryWatcher
                     queue.Enqueue(entry);
                 }
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception)
             {
-            }
-            catch (DirectoryNotFoundException)
-            {
+                // ignored
             }
         }
     }

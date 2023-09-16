@@ -160,11 +160,9 @@ public class SelfSustainableTree : IDisposable
                     queue.Enqueue(directory);
                 }
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception)
             {
-            }
-            catch (DirectoryNotFoundException)
-            {
+                // ignored
             }
         }
 
