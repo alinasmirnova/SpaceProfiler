@@ -95,7 +95,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
             return true;
         
         if (child is DirectoryViewModel) 
-            return !directory.ContainsSubdirectory(child.Name);
+            return !directory.ContainsSubdirectory(child.Entry!.Name);
 
         return false;
     }
