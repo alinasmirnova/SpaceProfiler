@@ -80,7 +80,7 @@ public class SelfSustainableTree : IDisposable
             {
                 ProcessWithRetry(path);
             }
-            Thread.Sleep(0);
+            Thread.Sleep(100);
         }
     }
 
@@ -104,7 +104,7 @@ public class SelfSustainableTree : IDisposable
             {
                 ProcessWithRetry(path);
             }
-            Thread.Sleep(0);
+            Thread.Sleep(100);
         }
     }
 
