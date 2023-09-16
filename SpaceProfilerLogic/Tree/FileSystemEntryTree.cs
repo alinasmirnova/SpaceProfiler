@@ -186,11 +186,27 @@ public class FileSystemEntryTree
     private FileSystemEntry?[] Update(string fullPath)
     {
         if (Directory.Exists(fullPath))
-            return Array.Empty<FileSystemEntry>();
+            return ChangeDirectory(fullPath);
 
         if (File.Exists(fullPath))
             return ChangeFile(fullPath);
         
+        return Array.Empty<FileSystemEntry>();
+    }
+
+    private FileSystemEntry?[] ChangeDirectory(string fullPath)
+    {
+        if (!nodes.ContainsKey(fullPath))
+            return CreateDirectory(fullPath);
+
+        var directory = nodes[fullPath];
+        var isAccessible = FileSystemHelper.IsDirectoryAccessible(fullPath);
+        if (directory.IsAccessible != isAccessible)
+        {
+            directory.IsAccessible = isAccessible;
+            return new[] { directory };
+        }
+
         return Array.Empty<FileSystemEntry>();
     }
 
@@ -200,7 +216,9 @@ public class FileSystemEntryTree
             return CreateFile(fullPath);
 
         var file = nodes[fullPath];
-        var (_, fileSize) = FileSystemHelper.GetFileActualSize(fullPath);
+        var (isAccessible, fileSize) = FileSystemHelper.GetFileActualSize(fullPath);
+        file.IsAccessible = isAccessible;
+        
         var diff = fileSize - file.GetSize;
         if (file.AddSize(diff))
         {

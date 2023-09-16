@@ -5,7 +5,7 @@ public class FileSystemEntry
     public string FullName { get; }
     public string Name { get; }
     
-    public bool IsAccessible { get; }
+    public bool IsAccessible { get; set; }
 
     protected long Size;
     public long GetSize => Size;
