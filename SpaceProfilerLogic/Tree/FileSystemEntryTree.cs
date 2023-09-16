@@ -288,7 +288,7 @@ public class FileSystemEntryTree
 
     private string GetParentFullName(string path)
     {
-        var parts = path.Split('\\').ToArray();
-        return string.Join('\\', parts.Take(parts.Length - 1));
+        var sep = path.LastIndexOf('\\');
+        return path.Substring(0, sep);
     }
 }
