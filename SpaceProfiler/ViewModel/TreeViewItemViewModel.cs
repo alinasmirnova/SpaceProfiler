@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using SpaceProfiler.Helpers;
@@ -109,14 +110,19 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
                 isExpanded = value;
                 UpdateIcon();
                 OnPropertyChanged();
-                if (value && Loaded)
-                    OnPropertyChanged(nameof(Children));
             }
 
-            if (!Loaded)
+            if (!Loaded && value)
             {
                 Children.RemoveAt(0);
                 LoadChildren();
+            }
+
+            if (Loaded && !value && Children.Any())
+            {
+                Children.Clear();
+                ChildrenByEntry.Clear();
+                Children.Add(UnloadedChild);
             }
         }
     }
