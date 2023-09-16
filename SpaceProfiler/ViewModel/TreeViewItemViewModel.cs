@@ -15,7 +15,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     public ObservableCollection<TreeViewItemViewModel> Children { get; } = new();
     protected readonly Dictionary<FileSystemEntry, TreeViewItemViewModel> ChildrenByEntry = new();
-    public bool Loaded => !(Children.Count == 1 && Children[0] == UnloadedChild);
+    public bool Loaded => !(Children.Count > 0 && Children[0] == UnloadedChild);
 
     private TreeViewItemViewModel()
     {
@@ -114,8 +114,8 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
             if (!Loaded && value)
             {
-                Children.RemoveAt(0);
                 LoadChildren();
+                Children.RemoveAt(0);
             }
 
             if (Loaded && !value && Children.Any())
