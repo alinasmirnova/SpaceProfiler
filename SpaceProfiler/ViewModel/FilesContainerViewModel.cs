@@ -8,7 +8,7 @@ namespace SpaceProfiler.ViewModel;
 public class FilesContainerViewModel : TreeViewItemViewModel
 {
     private DirectoryEntry Directory => ((DirectoryEntry?)Entry)!;
-    public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.Files.Any())
+    public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.FilesCount > 0)
     {
         Count = entry.FilesCount;
         Icon = Icons.Files;
@@ -30,7 +30,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
 
     protected override void LoadChildren()
     {
-        foreach (var fileEntry in Directory.Files)
+        foreach (var fileEntry in GetFiles())
         {
             AddChild(new FileViewModel(fileEntry));
         }
@@ -69,5 +69,12 @@ public class FilesContainerViewModel : TreeViewItemViewModel
         }
         
         return result;
+    }
+    
+    private FileEntry[] GetFiles()
+    {
+        if (Directory.FilesCount > MaxChildrenCount)
+            return Directory.GetTopFiles(TopChildrenCount);
+        return Directory.Files;
     }
 }

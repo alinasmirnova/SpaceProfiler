@@ -4,13 +4,12 @@ namespace SpaceProfilerLogic.Tree;
 
 public class DirectoryEntry : FileSystemEntry
 {
-    public const int MaxItemsCount = 500;
     private ConcurrentDictionary<string, FileEntry> files = new();
 
     public int FilesCount => files.Count;
     public FileEntry[] Files
     {
-        get => files.Values.Take(MaxItemsCount).ToArray();
+        get => files.Values.ToArray();
         set
         {
             files = new ConcurrentDictionary<string, FileEntry>();
@@ -20,6 +19,11 @@ public class DirectoryEntry : FileSystemEntry
                     file.Parent = this;
             }
         }
+    }
+
+    public FileEntry[] GetTopFiles(int count)
+    {
+        return Files.OrderByDescending(f => f.GetSize()).Take(count).ToArray();
     }
 
     public bool AddFile(FileEntry file)
@@ -51,7 +55,7 @@ public class DirectoryEntry : FileSystemEntry
     private ConcurrentDictionary<string, DirectoryEntry> subdirectories = new();
     public DirectoryEntry[] Subdirectories
     {
-        get => subdirectories.Values.Take(MaxItemsCount).ToArray();
+        get => subdirectories.Values.ToArray();
         set
         {
             subdirectories = new ConcurrentDictionary<string, DirectoryEntry>();
@@ -61,6 +65,11 @@ public class DirectoryEntry : FileSystemEntry
                     subdirectory.Parent = this;
             }
         }
+    }
+    
+    public DirectoryEntry[] GetTopSubdirectories(int count)
+    {
+        return Subdirectories.OrderByDescending(f => f.GetSize()).Take(count).ToArray();
     }
 
     public bool AddSubdirectory(DirectoryEntry directoryEntry)

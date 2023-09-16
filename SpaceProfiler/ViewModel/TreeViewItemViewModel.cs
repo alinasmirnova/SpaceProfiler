@@ -11,6 +11,9 @@ namespace SpaceProfiler.ViewModel;
 
 public class TreeViewItemViewModel : INotifyPropertyChanged
 {
+    protected const int MaxChildrenCount = 100;
+    protected const int TopChildrenCount = 20;
+    
     private static readonly TreeViewItemViewModel UnloadedChild = new();
 
     public ObservableCollection<TreeViewItemViewModel> Children { get; } = new();

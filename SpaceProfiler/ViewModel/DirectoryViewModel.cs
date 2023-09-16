@@ -11,7 +11,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
     private DirectoryEntry Directory => (DirectoryEntry) Entry!;
     private FilesContainerViewModel? filesContainer;
     
-    public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.Subdirectories.Any() || entry.Files.Any())
+    public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.SubdirectoriesCount > 0 || entry.FilesCount > 0)
     {
         Name = entry.Name;
         Count = entry.SubdirectoriesCount;
@@ -26,7 +26,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
             if (value != count)
             {
                 count = value;
-                if (value > DirectoryEntry.MaxItemsCount)
+                if (value > MaxChildrenCount)
                     Name = $"{Entry?.Name} [{Count} subdirectories]";
             }
         }
@@ -48,7 +48,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
 
     protected override void LoadChildren()
     {
-        foreach (var child in Directory.Subdirectories)
+        foreach (var child in GetSubdirectories())
         {
             AddChild(new DirectoryViewModel(child));
         }
@@ -60,16 +60,16 @@ public class DirectoryViewModel : TreeViewItemViewModel
         }
         else
         {
-            if (Directory.Files.Any())
+            if (Directory.FilesCount > 0)
             {
-                foreach (var file in Directory.Files)
+                foreach (var file in GetFiles())
                 {
                     AddChild(new FileViewModel(file));
                 }
             }
         }
     }
-
+    
     public override List<TreeViewItemViewModel> GetExtraChildren()
     {
         var needsFilesContainer = NeedFilesContainer();
@@ -111,14 +111,14 @@ public class DirectoryViewModel : TreeViewItemViewModel
         
         if (!NeedFilesContainer())
         {
-            foreach (var file in Directory.Files)
+            foreach (var file in GetFiles())
             {
                 if (!ChildrenByEntry.ContainsKey(file))
                     result.Add(new FileViewModel(file));
             }
         }
 
-        foreach (var subdirectory in Directory.Subdirectories)
+        foreach (var subdirectory in GetSubdirectories())
         {
             if (!ChildrenByEntry.ContainsKey(subdirectory))
                 result.Add(new DirectoryViewModel(subdirectory));
@@ -129,6 +129,20 @@ public class DirectoryViewModel : TreeViewItemViewModel
 
     private bool NeedFilesContainer()
     {
-        return Directory.Subdirectories.Any() && Directory.FilesCount > 1;
+        return Directory is { SubdirectoriesCount: > 0, FilesCount: > 1 };
+    }
+
+    private FileEntry[] GetFiles()
+    {
+        if (Directory.FilesCount > MaxChildrenCount)
+            return Directory.GetTopFiles(TopChildrenCount);
+        return Directory.Files;
+    }
+    
+    private DirectoryEntry[] GetSubdirectories()
+    {
+        if (Directory.SubdirectoriesCount > MaxChildrenCount)
+            return Directory.GetTopSubdirectories(TopChildrenCount);
+        return Directory.Subdirectories;
     }
 }
