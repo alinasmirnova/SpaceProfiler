@@ -35,6 +35,7 @@ public class SelfSustainableTree : IDisposable
         AddBackgroundWorker(ApplyChanges);
         AddBackgroundWorker(ApplyChanges);
         AddBackgroundWorker(ApplyChanges);
+        AddBackgroundWorker(ApplyRenewChanges);
 
         active = true;
         Loaded = false;
@@ -68,6 +69,18 @@ public class SelfSustainableTree : IDisposable
                 pathsToRenew.Enqueue(change);
             }
             Thread.Sleep(100);
+        }
+    }
+
+    private void ApplyRenewChanges()
+    {
+        while (active)
+        {
+            while (pathsToRenew.TryDequeue(out var path))
+            {
+                ProcessWithRetry(path);
+            }
+            Thread.Sleep(0);
         }
     }
 

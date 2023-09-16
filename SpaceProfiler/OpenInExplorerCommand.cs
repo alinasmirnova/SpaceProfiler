@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.DirectoryServices.ActiveDirectory;
+using System.IO;
 using System.Windows.Input;
 using SpaceProfiler.ViewModel;
 using SpaceProfilerLogic.Tree;
@@ -17,7 +19,16 @@ public class OpenInExplorerCommand : ICommand
 
     public bool CanExecute(object? parameter)
     {
-        return entry is { IsAccessible: true };
+        if (entry is { IsAccessible: false } or null)
+            return false;
+
+        if (entry is DirectoryEntry && !Directory.Exists(entry.FullName))
+            return false;
+        
+        if (entry is FileEntry && (entry.Parent == null || !Directory.Exists(entry.Parent.FullName)))
+            return false;
+
+        return true;
     }
 
     public void Execute(object? parameter)
