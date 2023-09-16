@@ -10,7 +10,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
     private DirectoryEntry Directory => ((DirectoryEntry?)Entry)!;
     public FilesContainerViewModel(DirectoryEntry entry) : base(entry, entry.Files.Any())
     {
-        Count = entry.Files.Length;
+        Count = entry.FilesCount;
         Icon = Icons.Files;
     }
 
@@ -39,7 +39,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
     public override void Update(IEnumerable<TreeViewItemViewModel> toAdd, IEnumerable<TreeViewItemViewModel> toDelete, long? rootSize)
     {
         base.Update(toAdd, toDelete, rootSize);
-        Count = Directory.Files.Length;
+        Count = Directory.FilesCount;
     }
 
     public override void UpdateSize()
