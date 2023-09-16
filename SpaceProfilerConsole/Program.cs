@@ -10,7 +10,7 @@ using var tree = new SelfSustainableTree(directory);
 
 Thread.Sleep(10000);
 
-Console.WriteLine($"Total size: {tree.Root.GetSize}");
+Console.WriteLine($"Total size: {tree.Root.GetSize()}");
 Console.WriteLine(tree.GetChangedNodes().Count);
 return 0;
 

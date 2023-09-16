@@ -70,7 +70,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     public virtual void UpdateSize()
     {
-        SizeValue = Entry?.GetSize ?? 0;
+        SizeValue = Entry?.GetSize() ?? 0;
         Size = FileSizeHelper.ToHumanReadableString(SizeValue);
     }
 
@@ -90,7 +90,7 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     public virtual void UpdatePercentFromRoot(long? rootSize)
     {
-        UpdatePercentFromRootInternal(FileSizeHelper.GetPercent(Entry?.GetSize, rootSize));
+        UpdatePercentFromRootInternal(FileSizeHelper.GetPercent(Entry?.GetSize(), rootSize));
     }
 
     protected void UpdatePercentFromRootInternal(double percent)

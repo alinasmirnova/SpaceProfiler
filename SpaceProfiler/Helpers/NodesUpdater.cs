@@ -70,13 +70,13 @@ public class NodesUpdater : IDisposable
                 {
                     if (current.Loaded)
                         dispatcher.Invoke(UpdateNode, current, current.GetMissingChildren(), current.GetExtraChildren(),
-                            model.Root.GetSize);
+                            model.Root.GetSize());
                     else
-                        dispatcher.Invoke(UpdateSize, current, model.Root.GetSize);
+                        dispatcher.Invoke(UpdateSize, current, model.Root.GetSize());
                 }
                 else
                 {
-                    dispatcher.Invoke(UpdatePercentageFromRoot, current, model.Root.GetSize);
+                    dispatcher.Invoke(UpdatePercentageFromRoot, current, model.Root.GetSize());
                 }
 
                 foreach (var child in current.Children)

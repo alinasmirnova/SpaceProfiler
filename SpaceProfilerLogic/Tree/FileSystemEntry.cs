@@ -8,7 +8,7 @@ public class FileSystemEntry
     public bool IsAccessible { get; set; }
 
     protected long Size;
-    public long GetSize => Size;
+    public long GetSize() => Size;
 
     public FileSystemEntry? Parent { get; set; }
 

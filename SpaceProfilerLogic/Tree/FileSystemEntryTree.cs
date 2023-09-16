@@ -67,7 +67,7 @@ public class FileSystemEntryTree
         if (directory?.Parent != null)
         {
             result.Add(directory.Parent);
-            if (directory.GetSize > 0 || createdParents.Any())
+            if (directory.GetSize() > 0 || createdParents.Any())
             {
                 result = result.Concat(GetParents(directory.Parent)).ToList();
             }
@@ -131,7 +131,7 @@ public class FileSystemEntryTree
 
         nodes.TryAdd(file.FullName, file);
 
-        var result = file.GetSize > 0 ? GetParents(file) : new List<FileSystemEntry>();
+        var result = file.GetSize() > 0 ? GetParents(file) : new List<FileSystemEntry>();
         result.Add(parent);
         result.Add(file);
         return result.Distinct().ToArray();
@@ -219,7 +219,7 @@ public class FileSystemEntryTree
         var (isAccessible, fileSize) = FileSystemHelper.GetFileActualSize(fullPath);
         file.IsAccessible = isAccessible;
         
-        var diff = fileSize - file.GetSize;
+        var diff = fileSize - file.GetSize();
         if (file.AddSize(diff))
         {
             var result = GetParents(file);
@@ -255,7 +255,7 @@ public class FileSystemEntryTree
             RemoveFromNodesWithSubElements(fullPath);
 
             var result = new List<FileSystemEntry>() { parent };
-            if (entry.GetSize > 0)
+            if (entry.GetSize() > 0)
             {
                 result = result.Concat(GetParents(parent)).ToList();
             }

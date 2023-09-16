@@ -90,7 +90,7 @@ public class SelfSustainableTreeChangesTests
             Files = new[] { newFile1, newFile2 }
         };
 
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize + 2000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() + 2000)
         {
             Files = expectedRoot.Files,
             Subdirectories = expectedRoot.Subdirectories.Concat(new []{ newDir }).ToArray()
@@ -121,7 +121,7 @@ public class SelfSustainableTreeChangesTests
             Subdirectories = new[] { newDir }
         };
 
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize + 2000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() + 2000)
         {
             Files = expectedRoot.Files,
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldDir2).Concat(new []{ newDir2 }).ToArray()
@@ -140,7 +140,7 @@ public class SelfSustainableTreeChangesTests
         
         var newFile = new FileEntry($"{rootFullName}\\3f", 1000);
 
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize + 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() + 1000)
         {
             Files = expectedRoot.Files.Concat(new []{newFile}).ToArray(),
             Subdirectories = expectedRoot.Subdirectories
@@ -179,7 +179,7 @@ public class SelfSustainableTreeChangesTests
         };
         
         var parent = Find(expectedRoot, $"{rootFullName}\\2");
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize + 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() + 1000)
         {
             Files = expectedRoot.Files,
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != parent).Concat(new[] { newDir2 }).ToArray()
@@ -213,7 +213,7 @@ public class SelfSustainableTreeChangesTests
         
         var newFile = new FileEntry($"{rootFullName}\\1f", 500);
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 500)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 500)
         {
             Files = expectedRoot.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray(),
             Subdirectories = expectedRoot.Subdirectories
@@ -232,7 +232,7 @@ public class SelfSustainableTreeChangesTests
         
         var newFile = new FileEntry($"{rootFullName}\\1f", 0);
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 1000)
         {
             Files = expectedRoot.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray(),
             Subdirectories = expectedRoot.Subdirectories
@@ -252,13 +252,13 @@ public class SelfSustainableTreeChangesTests
         var newFile = new FileEntry($"{rootFullName}\\1\\11f", 500);
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
         var oldParent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
-        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize - 500)
+        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize() - 500)
         {
             Subdirectories = oldParent.Subdirectories,
             Files = oldParent.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray()
         };
 
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 500)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 500)
         {
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldParent).Concat(new[] { newParent })
                 .ToArray(),
@@ -279,13 +279,13 @@ public class SelfSustainableTreeChangesTests
         var newFile = new FileEntry($"{rootFullName}\\1\\11f", 0);
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
         var oldParent = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
-        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize - 1000)
+        var newParent = new DirectoryEntry(oldParent.FullName, oldParent.GetSize() - 1000)
         {
             Subdirectories = oldParent.Subdirectories,
             Files = oldParent.Files.Where(f => f != oldFile).Concat(new[] { newFile }).ToArray()
         };
 
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 1000)
         {
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldParent).Concat(new[] { newParent })
                 .ToArray(),
@@ -304,7 +304,7 @@ public class SelfSustainableTreeChangesTests
         DoWithDelay(tree, () => helper.Delete("1f"));
 
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1f")!;
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 1000)
         {
             Subdirectories = expectedRoot.Subdirectories,
             Files = expectedRoot.Files.Where(f => f != oldFile).ToArray()
@@ -324,12 +324,12 @@ public class SelfSustainableTreeChangesTests
 
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\1\\11f")!;
         var oldDir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
-        var newDir1 = new DirectoryEntry(oldDir1.FullName, oldDir1.GetSize - 1000)
+        var newDir1 = new DirectoryEntry(oldDir1.FullName, oldDir1.GetSize() - 1000)
         {
             Subdirectories = oldDir1.Subdirectories,
             Files = oldDir1.Files.Where(f => f != oldFile).ToArray()
         };
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - 1000)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - 1000)
         {
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != oldDir1).Concat(new []{newDir1}).ToArray(),
             Files = expectedRoot.Files
@@ -348,7 +348,7 @@ public class SelfSustainableTreeChangesTests
         DoWithDelay(tree, () => helper.Delete("empty"));
 
         var oldFile = (FileEntry)Find(expectedRoot, $"{rootFullName}\\empty")!;
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize())
         {
             Subdirectories = expectedRoot.Subdirectories,
             Files = expectedRoot.Files.Where(f => f != oldFile).ToArray()
@@ -384,7 +384,7 @@ public class SelfSustainableTreeChangesTests
 
         var dir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
         var dir11 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\11")!;
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - dir1.GetSize)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - dir1.GetSize())
         {
             Files = expectedRoot.Files,
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != dir1).ToArray()
@@ -405,13 +405,13 @@ public class SelfSustainableTreeChangesTests
 
         var dir1 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1")!;
         var dir11 = (DirectoryEntry)Find(expectedRoot, $"{rootFullName}\\1\\11")!;
-        var newDir1 = new DirectoryEntry(dir1.FullName, dir1.GetSize - dir11.GetSize)
+        var newDir1 = new DirectoryEntry(dir1.FullName, dir1.GetSize() - dir11.GetSize())
         {
             Subdirectories = dir1.Subdirectories.Where(d => d != dir11).ToArray(),
             Files = dir1.Files
         };
         
-        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize - dir11.GetSize)
+        expectedRoot = new DirectoryEntry(expectedRoot.FullName, expectedRoot.GetSize() - dir11.GetSize())
         {
             Files = expectedRoot.Files,
             Subdirectories = expectedRoot.Subdirectories.Where(d => d != dir1).Concat(new []{newDir1}).ToArray()

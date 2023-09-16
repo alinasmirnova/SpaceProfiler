@@ -16,6 +16,6 @@ public class FileViewModel : TreeViewItemViewModel
         if (!entry.IsAccessible)
             Icon = Icons.Inaccessible;
         else
-            Icon = entry.GetSize == 0 ? Icons.EmptyFile : Icons.File;
+            Icon = entry.GetSize() == 0 ? Icons.EmptyFile : Icons.File;
     }
 }

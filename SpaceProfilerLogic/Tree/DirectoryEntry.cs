@@ -27,7 +27,7 @@ public class DirectoryEntry : FileSystemEntry
         file.Parent = this;
         if (files.TryAdd(file.Name, file))
         {
-            AddSize(file.GetSize);
+            AddSize(file.GetSize());
             return true;
         }
 
@@ -39,7 +39,7 @@ public class DirectoryEntry : FileSystemEntry
         if (files.TryRemove(file.Name, out _))
         {
             file.Parent = null;
-            AddSize(-file.GetSize);
+            AddSize(-file.GetSize());
             return true;
         }
 
@@ -68,7 +68,7 @@ public class DirectoryEntry : FileSystemEntry
         directoryEntry.Parent = this;
         if (subdirectories.TryAdd(directoryEntry.Name, directoryEntry))
         {
-            AddSize(directoryEntry.GetSize);
+            AddSize(directoryEntry.GetSize());
             return true;
         }
         return false;
@@ -79,7 +79,7 @@ public class DirectoryEntry : FileSystemEntry
         if (subdirectories.TryRemove(directoryEntry.Name, out _))
         {
             directoryEntry.Parent = null;
-            AddSize(-directoryEntry.GetSize);
+            AddSize(-directoryEntry.GetSize());
             return true;
         }
 
