@@ -14,6 +14,28 @@ public class DirectoryViewModel : TreeViewItemViewModel
     public DirectoryViewModel(DirectoryEntry entry) : base(entry, entry.Subdirectories.Any() || entry.Files.Any())
     {
         Name = entry.Name;
+        Count = entry.Subdirectories.Length;
+    }
+    
+    private int count;
+    public int Count
+    {
+        get => count;
+        set
+        {
+            if (value != count)
+            {
+                count = value;
+                if (value > 1000)
+                    Name = $"{Entry?.Name} [{Count} subdirectories]";
+            }
+        }
+    }
+
+    public override void UpdateSize()
+    {
+        base.UpdateSize();
+        Count = Directory.Subdirectories.Length;
     }
 
     protected override void UpdateIcon()
