@@ -14,7 +14,7 @@ public static class FileSystemAccessHelper
             
             return true;
         }
-        catch (UnauthorizedAccessException e)
+        catch (Exception e)
         {
             return false;
         }
@@ -29,7 +29,7 @@ public static class FileSystemAccessHelper
             
             return (true, 0);
         }
-        catch (UnauthorizedAccessException e)
+        catch (Exception e)
         {
             return (false, 0);
         }
