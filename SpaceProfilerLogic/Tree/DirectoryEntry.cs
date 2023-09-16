@@ -4,13 +4,13 @@ namespace SpaceProfilerLogic.Tree;
 
 public class DirectoryEntry : FileSystemEntry
 {
-    private const int max_items_count = 500;
+    public const int MaxItemsCount = 500;
     private ConcurrentDictionary<string, FileEntry> files = new();
 
     public int FilesCount => files.Count;
     public FileEntry[] Files
     {
-        get => files.Values.Take(max_items_count).ToArray();
+        get => files.Values.Take(MaxItemsCount).ToArray();
         set
         {
             files = new ConcurrentDictionary<string, FileEntry>();
@@ -51,7 +51,7 @@ public class DirectoryEntry : FileSystemEntry
     private ConcurrentDictionary<string, DirectoryEntry> subdirectories = new();
     public DirectoryEntry[] Subdirectories
     {
-        get => subdirectories.Values.Take(max_items_count).ToArray();
+        get => subdirectories.Values.Take(MaxItemsCount).ToArray();
         set
         {
             subdirectories = new ConcurrentDictionary<string, DirectoryEntry>();

@@ -26,7 +26,7 @@ public class DirectoryViewModel : TreeViewItemViewModel
             if (value != count)
             {
                 count = value;
-                if (value > 1000)
+                if (value > DirectoryEntry.MaxItemsCount)
                     Name = $"{Entry?.Name} [{Count} subdirectories]";
             }
         }
