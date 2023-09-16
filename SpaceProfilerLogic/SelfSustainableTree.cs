@@ -9,7 +9,8 @@ public class SelfSustainableTree : IDisposable
     private readonly ConcurrentDictionary<FileSystemEntry, byte> changedNodes = new();
     private readonly ConcurrentQueue<string> pathsToRenew = new();
     private readonly ConcurrentQueue<string> pathsToLoad = new();
-    
+    private readonly ConcurrentQueue<string> pathsWithError = new();
+
     private bool active;
 
     private readonly List<Thread> workers = new();
@@ -45,7 +46,7 @@ public class SelfSustainableTree : IDisposable
             worker.Start();
         }
     }
-    
+
     public HashSet<FileSystemEntry> GetChangedNodes()
     {
         var result = new HashSet<FileSystemEntry>();
@@ -76,16 +77,45 @@ public class SelfSustainableTree : IDisposable
         {
             while (pathsToLoad.TryDequeue(out var path))
             {
-                ApplyChange(path);
+                ProcessWithRetry(path);
+            }
+            
+            while (pathsWithError.TryDequeue(out var path))
+            {
+                ProcessSafe(path);
             }
 
             Loaded = IsRead;
             
             while (pathsToRenew.TryDequeue(out var path))
             {
-                ApplyChange(path);
+                ProcessWithRetry(path);
             }
             Thread.Sleep(0);
+        }
+    }
+
+    private void ProcessWithRetry(string path)
+    {
+        try
+        {
+            ApplyChange(path);
+        }
+        catch (Exception)
+        {
+            pathsWithError.Enqueue(path);
+        }
+    }
+    
+    private void ProcessSafe(string path)
+    {
+        try
+        {
+            ApplyChange(path);
+        }
+        catch (Exception)
+        {
+            // ignored
         }
     }
 
@@ -110,9 +140,18 @@ public class SelfSustainableTree : IDisposable
             if (!FileSystemAccessHelper.IsDirectoryAccessible(path))
                 continue;
 
-            foreach (var directory in Directory.EnumerateDirectories(path))
+            try
             {
-                queue.Enqueue(directory);
+                foreach (var directory in Directory.EnumerateDirectories(path))
+                {
+                    queue.Enqueue(directory);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+            catch (DirectoryNotFoundException)
+            {
             }
         }
 

@@ -87,9 +87,18 @@ public class DirectoryWatcher
             if (!FileSystemAccessHelper.IsDirectoryAccessible(current))
                 continue;
 
-            foreach (var entry in Directory.EnumerateFileSystemEntries(current))
+            try
             {
-                queue.Enqueue(entry);
+                foreach (var entry in Directory.EnumerateFileSystemEntries(current))
+                {
+                    queue.Enqueue(entry);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+            catch (DirectoryNotFoundException)
+            {
             }
         }
     }

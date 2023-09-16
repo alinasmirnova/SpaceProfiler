@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Ookii.Dialogs.Wpf;
@@ -39,10 +40,17 @@ namespace SpaceProfiler
                 
                 viewModel.CurrentDirectory = dialog.SelectedPath;
                 nodesUpdater?.Dispose();
-                
-                var tree = new SelfSustainableTree(dialog.SelectedPath);
-                viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
-                nodesUpdater = new NodesUpdater(viewModel, tree, Dispatcher);
+
+                try
+                {
+                    var tree = new SelfSustainableTree(dialog.SelectedPath);
+                    viewModel.Items = new[] { new DirectoryViewModel(tree.Root) };
+                    nodesUpdater = new NodesUpdater(viewModel, tree, Dispatcher);
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show($"Failed to open directory: {exception.Message}");
+                }
             }
         }
 
