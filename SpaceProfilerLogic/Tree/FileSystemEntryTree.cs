@@ -81,7 +81,7 @@ public class FileSystemEntryTree
         DirectoryEntry result;
 
         var files = new List<FileEntry>();
-        if (FileSystemAccessHelper.IsDirectoryAccessible(fullPath))
+        if (FileSystemHelper.IsDirectoryAccessible(fullPath))
         {
             long sum = 0;
             foreach (var file in Directory.EnumerateFiles(fullPath))
@@ -89,7 +89,7 @@ public class FileSystemEntryTree
                 if (!File.Exists(file))
                     continue;
                 
-                var (isAccessible, fileSize) = FileSystemAccessHelper.GetFileActualSize(file);
+                var (isAccessible, fileSize) = FileSystemHelper.GetFileActualSize(file);
                 files.Add(new FileEntry(file, fileSize, isAccessible));
                 sum += fileSize;
             }
@@ -124,7 +124,7 @@ public class FileSystemEntryTree
             return createdParents.Concat(GetParents(parent))
                 .Concat(createdParents.SelectMany(p => p.Files)).Distinct().ToArray();
        
-        var (isAccessible, fileSize) = FileSystemAccessHelper.GetFileActualSize(fullPath);
+        var (isAccessible, fileSize) = FileSystemHelper.GetFileActualSize(fullPath);
         var file = new FileEntry(fullPath, fileSize, isAccessible);
         if (!parent.AddFile(file))
             return Array.Empty<FileSystemEntry>();
@@ -200,7 +200,7 @@ public class FileSystemEntryTree
             return CreateFile(fullPath);
 
         var file = nodes[fullPath];
-        var (_, fileSize) = FileSystemAccessHelper.GetFileActualSize(fullPath);
+        var (_, fileSize) = FileSystemHelper.GetFileActualSize(fullPath);
         var diff = fileSize - file.GetSize;
         if (file.AddSize(diff))
         {

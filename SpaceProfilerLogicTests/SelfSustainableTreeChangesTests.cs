@@ -3,7 +3,7 @@ using FluentAssertions;
 using FluentAssertions.Equivalency;
 using SpaceProfilerLogic;
 using SpaceProfilerLogic.Tree;
-using SpaceProfilerLogicTests.TestHelpers;
+using FileSystemHelper = SpaceProfilerLogicTests.TestHelpers.FileSystemHelper;
 
 namespace SpaceProfilerLogicTests;
 

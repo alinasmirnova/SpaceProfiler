@@ -150,7 +150,7 @@ public class SelfSustainableTree : IDisposable
             if (path != rootFullPath)
                 pathsToLoad.Enqueue(path);
             
-            if (!FileSystemAccessHelper.IsDirectoryAccessible(path))
+            if (!FileSystemHelper.IsDirectoryAccessible(path))
                 continue;
 
             try
