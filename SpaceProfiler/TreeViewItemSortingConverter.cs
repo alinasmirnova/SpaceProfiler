@@ -14,7 +14,8 @@ public class TreeViewItemSortingConverter : IValueConverter
         var view = new ListCollectionView(collection ?? throw new InvalidOperationException());
         var sort = new SortDescription(parameter?.ToString() ?? string.Empty, ListSortDirection.Descending);
         view.SortDescriptions.Add(sort);
-
+        view.LiveSortingProperties.Add(parameter?.ToString());
+        view.IsLiveSorting = true;
         return view;
     }
 
