@@ -57,35 +57,42 @@ public class NodesUpdater : IDisposable
     {
         while (syncInProgress)
         {
-            var changedNodes = model.GetChangedNodes();
-
-            var queue = new Queue<TreeViewItemViewModel>();
-            queue.Enqueue(treeRootViewModel);
-            while (queue.TryDequeue(out var current))
+            try
             {
-                if (current.Entry == null)
-                    continue;
+                var changedNodes = model.GetChangedNodes();
 
-                if (changedNodes.Contains(current.Entry))
+                var queue = new Queue<TreeViewItemViewModel>();
+                queue.Enqueue(treeRootViewModel);
+                while (queue.TryDequeue(out var current))
                 {
-                    if (current.Loaded)
-                    {
-                        current.CompareChildren(out var missing, out var extra);
-                        dispatcher.Invoke(UpdateNode, current, missing, extra, model.Root.GetSize());
+                    if (current.Entry == null)
+                        continue;
 
+                    if (changedNodes.Contains(current.Entry))
+                    {
+                        if (current.Loaded)
+                        {
+                            current.CompareChildren(out var missing, out var extra);
+                            dispatcher.Invoke(UpdateNode, current, missing, extra, model.Root.GetSize());
+
+                        }
+                        else
+                            dispatcher.Invoke(UpdateSize, current, model.Root.GetSize());
                     }
                     else
-                        dispatcher.Invoke(UpdateSize, current, model.Root.GetSize());
-                }
-                else
-                {
-                    dispatcher.Invoke(UpdatePercentageFromRoot, current, model.Root.GetSize());
-                }
+                    {
+                        dispatcher.Invoke(UpdatePercentageFromRoot, current, model.Root.GetSize());
+                    }
 
-                foreach (var child in current.Children)
-                {
-                    queue.Enqueue(child);
+                    foreach (var child in current.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                // ignored
             }
             
             Thread.Sleep(500);
