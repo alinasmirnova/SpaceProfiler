@@ -264,6 +264,10 @@ public class TreeViewItemViewModel : INotifyPropertyChanged
 
     #endregion
 
-    public virtual List<TreeViewItemViewModel> GetMissingChildren() => new();
-    public virtual List<TreeViewItemViewModel> GetExtraChildren() => new();
+    public virtual void CompareChildren(out List<TreeViewItemViewModel> missingChildren,
+        out List<TreeViewItemViewModel> extraChildren)
+    {
+        extraChildren = new List<TreeViewItemViewModel>();
+        missingChildren = new List<TreeViewItemViewModel>();
+    }
 }

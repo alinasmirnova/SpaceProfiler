@@ -53,28 +53,25 @@ public class FilesContainerViewModel : TreeViewItemViewModel
         UpdatePercentFromRootInternal(FileSizeHelper.GetPercent(Directory.Files.Sum(f => f.GetSize()), rootSize));
     }
 
-    public override List<TreeViewItemViewModel> GetExtraChildren()
+    public override void CompareChildren(out List<TreeViewItemViewModel> missingChildren, out List<TreeViewItemViewModel> extraChildren)
     {
-        return Children.Where(child => !Directory.ContainsFile(child.Name)).ToList();
-    }
+        var files = GetFiles();
 
-    public override List<TreeViewItemViewModel> GetMissingChildren()
-    {
-        var result = new List<TreeViewItemViewModel>();
-
-        foreach (var file in Directory.Files)
+        missingChildren = new List<TreeViewItemViewModel>();
+        foreach (var file in files)
         {
             if (!ChildrenByEntry.ContainsKey(file))
-                result.Add(new FileViewModel(file));
+                missingChildren.Add(new FileViewModel(file));
         }
-        
-        return result;
+
+        extraChildren = new List<TreeViewItemViewModel>();
+        missingChildren = Children.Where(child => !files.Contains(child.Entry)).ToList();
     }
-    
-    private FileEntry[] GetFiles()
+
+    private HashSet<FileEntry> GetFiles()
     {
         if (Directory.FilesCount > MaxChildrenCount)
             return Directory.GetTopFiles(TopChildrenCount);
-        return Directory.Files;
+        return Directory.Files.ToHashSet();
     }
 }

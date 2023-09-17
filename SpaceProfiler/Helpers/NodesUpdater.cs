@@ -69,8 +69,11 @@ public class NodesUpdater : IDisposable
                 if (changedNodes.Contains(current.Entry))
                 {
                     if (current.Loaded)
-                        dispatcher.Invoke(UpdateNode, current, current.GetMissingChildren(), current.GetExtraChildren(),
-                            model.Root.GetSize());
+                    {
+                        current.CompareChildren(out var missing, out var extra);
+                        dispatcher.Invoke(UpdateNode, current, missing, extra, model.Root.GetSize());
+
+                    }
                     else
                         dispatcher.Invoke(UpdateSize, current, model.Root.GetSize());
                 }

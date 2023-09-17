@@ -69,80 +69,77 @@ public class DirectoryViewModel : TreeViewItemViewModel
             }
         }
     }
-    
-    public override List<TreeViewItemViewModel> GetExtraChildren()
-    {
-        var needsFilesContainer = NeedFilesContainer();
 
-        if (filesContainer != null && IsExtraChild(Directory, filesContainer, needsFilesContainer))
+    public override void CompareChildren(out List<TreeViewItemViewModel> missingChildren, out List<TreeViewItemViewModel> extraChildren)
+    {
+        var subdirectories = GetSubdirectories();
+        var files = GetFiles();
+        
+        var needsFilesContainer = NeedFilesContainer();
+        if (filesContainer != null && IsExtraChild(filesContainer, files, subdirectories,  needsFilesContainer))
             filesContainer = null;
         
-        return Children.Where(child => IsExtraChild(Directory, child, needsFilesContainer)).ToList();
+        extraChildren = Children.Where(child => IsExtraChild(child, files, subdirectories, needsFilesContainer)).ToList();
+        
+        missingChildren = new List<TreeViewItemViewModel>();
+        if (needsFilesContainer && filesContainer == null)
+        {
+            filesContainer = new FilesContainerViewModel(Directory);
+            missingChildren.Add(filesContainer);
+        }
+        
+        if (!needsFilesContainer)
+        {
+            foreach (var file in files)
+            {
+                if (!ChildrenByEntry.ContainsKey(file))
+                    missingChildren.Add(new FileViewModel(file));
+            }
+        }
+
+        foreach (var subdirectory in subdirectories)
+        {
+            if (!ChildrenByEntry.ContainsKey(subdirectory))
+                missingChildren.Add(new DirectoryViewModel(subdirectory));
+        }
     }
 
-    private static bool IsExtraChild(DirectoryEntry directory, TreeViewItemViewModel child, bool needFilesContainer)
+    private static bool IsExtraChild(TreeViewItemViewModel child, HashSet<FileEntry> files, HashSet<DirectoryEntry> subdirectories, bool needsFilesContainer)
     {
-        if (child is FilesContainerViewModel && !needFilesContainer)
+        if (child is FilesContainerViewModel && !needsFilesContainer)
             return true;
 
-        if (child is FilesContainerViewModel && needFilesContainer)
+        if (child is FilesContainerViewModel && needsFilesContainer)
             return false;
 
-        if (child is FileViewModel && needFilesContainer)
+        if (child is FileViewModel && needsFilesContainer)
             return true;
 
-        if (child is FileViewModel && !directory.ContainsFile(child.Name))
+        if (child is FileViewModel && !files.Contains(child.Entry))
             return true;
         
         if (child is DirectoryViewModel) 
-            return !directory.ContainsSubdirectory(child.Entry!.Name);
+            return !subdirectories.Contains(child.Entry);
 
         return false;
     }
 
-    public override List<TreeViewItemViewModel> GetMissingChildren()
-    {
-        var result = new List<TreeViewItemViewModel>();
-        if (NeedFilesContainer() && filesContainer == null)
-        {
-            filesContainer = new FilesContainerViewModel(Directory);
-            result.Add(filesContainer);
-        }
-        
-        if (!NeedFilesContainer())
-        {
-            foreach (var file in GetFiles())
-            {
-                if (!ChildrenByEntry.ContainsKey(file))
-                    result.Add(new FileViewModel(file));
-            }
-        }
-
-        foreach (var subdirectory in GetSubdirectories())
-        {
-            if (!ChildrenByEntry.ContainsKey(subdirectory))
-                result.Add(new DirectoryViewModel(subdirectory));
-        }
-
-        return result;
-    }
-
     private bool NeedFilesContainer()
     {
-        return Directory is { SubdirectoriesCount: > 0, FilesCount: > 1 };
+        return Directory is { SubdirectoriesCount: > 0, FilesCount: > 1 } or { FilesCount: > MaxChildrenCount };
     }
 
-    private FileEntry[] GetFiles()
+    private HashSet<FileEntry> GetFiles()
     {
         if (Directory.FilesCount > MaxChildrenCount)
             return Directory.GetTopFiles(TopChildrenCount);
-        return Directory.Files;
+        return Directory.Files.ToHashSet();
     }
     
-    private DirectoryEntry[] GetSubdirectories()
+    private HashSet<DirectoryEntry> GetSubdirectories()
     {
         if (Directory.SubdirectoriesCount > MaxChildrenCount)
             return Directory.GetTopSubdirectories(TopChildrenCount);
-        return Directory.Subdirectories;
+        return Directory.Subdirectories.ToHashSet();
     }
 }

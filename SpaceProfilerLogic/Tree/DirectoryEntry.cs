@@ -21,9 +21,9 @@ public class DirectoryEntry : FileSystemEntry
         }
     }
 
-    public FileEntry[] GetTopFiles(int count)
+    public HashSet<FileEntry> GetTopFiles(int count)
     {
-        return Files.OrderByDescending(f => f.GetSize()).Take(count).ToArray();
+        return Files.OrderByDescending(f => f.GetSize()).Take(count).ToHashSet();
     }
 
     public bool AddFile(FileEntry file)
@@ -67,9 +67,9 @@ public class DirectoryEntry : FileSystemEntry
         }
     }
     
-    public DirectoryEntry[] GetTopSubdirectories(int count)
+    public HashSet<DirectoryEntry> GetTopSubdirectories(int count)
     {
-        return Subdirectories.OrderByDescending(f => f.GetSize()).Take(count).ToArray();
+        return Subdirectories.OrderByDescending(f => f.GetSize()).Take(count).ToHashSet();
     }
 
     public bool AddSubdirectory(DirectoryEntry directoryEntry)
@@ -94,10 +94,6 @@ public class DirectoryEntry : FileSystemEntry
 
         return false;
     }
-
-    public bool ContainsFile(string fileName) => files.ContainsKey(fileName);
-    public bool ContainsSubdirectory(string fileName) => subdirectories.ContainsKey(fileName);
-
    
     public DirectoryEntry(string fullName, long size, bool isAccessible, FileSystemEntry? parent) : base(fullName, isAccessible, parent)
     {
