@@ -64,8 +64,7 @@ public class FilesContainerViewModel : TreeViewItemViewModel
                 missingChildren.Add(new FileViewModel(file));
         }
 
-        extraChildren = new List<TreeViewItemViewModel>();
-        missingChildren = Children.Where(child => !files.Contains(child.Entry)).ToList();
+        extraChildren = Children.Where(child => !files.Contains(child.Entry)).ToList();
     }
 
     private HashSet<FileEntry> GetFiles()
