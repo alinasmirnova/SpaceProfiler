@@ -10,6 +10,8 @@
         Title="Space Profiler" Height="450" Width="800" Icon="Icons\icons8-rocket-take-off-32.png">
     <Window.Resources>
         <local:TreeViewItemSortingConverter x:Key="SortingConverter" />
+        <local:TrimmedTextBlockVisibilityConverter x:Key="TrimmedVisibilityConverter" />
+        <local:TrimmingValueConverter x:Key="TrimmingValueConverter" />
     </Window.Resources>
     <DockPanel>
        <Grid DockPanel.Dock="Top" VerticalAlignment="Center" Margin="5">
@@ -67,8 +69,16 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="C"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="{Binding Icon}" Width="11"/>
-                            <TextBlock Margin="3 0" Text="{Binding Name}" />
+                            <Image Source="{Binding Icon}" Width="11" Margin="0 0 3 0"/>
+                            <TextBlock Text="{Binding Name, Converter={StaticResource TrimmingValueConverter}}" TextWrapping="NoWrap">
+                                <TextBlock.ToolTip>
+                                    <ToolTip Visibility="{Binding Name, Converter={StaticResource TrimmedVisibilityConverter}}">
+                                        <ToolTip.Content>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </ToolTip.Content>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
                         </StackPanel>
                         <TextBlock Grid.Column="1" Margin="10 0" Text="{Binding Size}" />
                         <TextBlock Grid.Column="2" Margin="10 0" Text="{Binding PercentFromRoot}" />
