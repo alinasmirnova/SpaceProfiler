@@ -6,12 +6,13 @@
         xmlns:local="clr-namespace:SpaceProfiler"
         xmlns:viewModel="clr-namespace:SpaceProfiler.ViewModel"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:converters="clr-namespace:SpaceProfiler.Converters"
         mc:Ignorable="d"
         Title="Space Profiler" Height="450" Width="800" Icon="Icons\icons8-rocket-take-off-32.png">
     <Window.Resources>
-        <local:TreeViewItemSortingConverter x:Key="SortingConverter" />
-        <local:TrimmedTextBlockVisibilityConverter x:Key="TrimmedVisibilityConverter" />
-        <local:TrimmingValueConverter x:Key="TrimmingValueConverter" />
+        <converters:TreeViewItemSortingConverter x:Key="SortingConverter" />
+        <converters:TrimmedTextBlockVisibilityConverter x:Key="TrimmedVisibilityConverter" />
+        <converters:TrimmingValueConverter x:Key="TrimmingValueConverter" />
     </Window.Resources>
     <DockPanel>
        <Grid DockPanel.Dock="Top" VerticalAlignment="Center" Margin="5">

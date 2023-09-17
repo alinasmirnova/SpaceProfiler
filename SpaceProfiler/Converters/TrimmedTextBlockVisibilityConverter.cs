@@ -1,17 +1,18 @@
 using System;
+using System.Windows;
 using System.Windows.Data;
 
-namespace SpaceProfiler;
+namespace SpaceProfiler.Converters;
 
-public class TrimmingValueConverter : IValueConverter
+public class TrimmedTextBlockVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
     {
         if (value is string content)
         {
             if (content.Length <= Constants.MaxNodeNameLength)
-                return content;
-            return content.Substring(0, Constants.MaxNodeNameLength) + "...";
+                return Visibility.Hidden;
+            return Visibility.Visible;
         }
 
         return string.Empty;
